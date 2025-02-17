@@ -24,3 +24,20 @@ class Airport(models.Model):
 
     def __str__(self) -> str:
         return f"{self.name} {self.iata_code}"
+
+
+class Route(models.Model):
+    source = models.ForeignKey(
+        Airport,
+        on_delete=models.CASCADE,
+        related_name="departing_routes"
+    )
+    destination = models.ForeignKey(
+        Airport,
+        on_delete=models.CASCADE,
+        related_name="arriving_routes"
+    )
+    distance = models.IntegerField()
+
+    def __str__(self) -> str:
+        return f"{self.source.name} - {self.destination.name}"

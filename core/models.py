@@ -41,3 +41,13 @@ class Route(models.Model):
 
     def __str__(self) -> str:
         return f"{self.source.name} - {self.destination.name}"
+
+
+class Role(models.Model):
+    name = models.CharField(max_length=255, unique=True)
+
+    class Meta:
+        ordering = ("name",)
+
+    def __str__(self) -> str:
+        return self.name

@@ -95,3 +95,13 @@ class CrewGroup(models.Model):
         if self.flight:
             return f"Crew of flight {self.flight.flight_number}"
         return "Unassigned crew"
+
+
+class AirplaneType(models.Model):
+    name = models.CharField(max_length=255, unique=True)
+
+    class Meta:
+        ordering = ("name",)
+
+    def __str__(self) -> str:
+        return self.name

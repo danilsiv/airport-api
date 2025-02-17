@@ -120,3 +120,37 @@ class Airplane(models.Model):
 
     def __str__(self) -> str:
         return self.model_name
+
+
+class SeatConfiguration(models.Model):
+    SEATS_CLASS_CHOICES = [
+        ("EC", "Economy Class"),
+        ("BC", "Business Class"),
+        ("FC", "First Class"),
+    ]
+    seats_class = models.CharField(
+        max_length=2,
+        choices=SEATS_CLASS_CHOICES,
+        default="EC"
+    )
+    rows = models.IntegerField()
+    seats_in_row = models.IntegerField()
+    airplane = models.ForeignKey(
+        Airplane,
+        on_delete=models.CASCADE,
+        related_name="seats_configuration"
+    )
+
+    class Meta:
+        ordering = (
+            "airplane__model_name",
+            models.Case(
+                models.When(seats_class="EC", then=0),
+                models.When(seats_class="BC", then=1),
+                models.When(seats_class="FC", then=2),
+                output_field=models.IntegerField()
+            ),
+        )
+
+    def __str__(self) -> str:
+        return f"{self.get_seats_class_display()} Configuration ({self.airplane.model_name}"

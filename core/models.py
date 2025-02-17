@@ -105,3 +105,18 @@ class AirplaneType(models.Model):
 
     def __str__(self) -> str:
         return self.name
+
+
+class Airplane(models.Model):
+    model_name = models.CharField(max_length=255)
+    type = models.ForeignKey(
+        AirplaneType,
+        on_delete=models.CASCADE,
+        related_name="airplanes"
+    )
+
+    class Meta:
+        ordering = ("type__name", "model_name")
+
+    def __str__(self) -> str:
+        return self.model_name

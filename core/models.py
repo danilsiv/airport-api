@@ -154,3 +154,53 @@ class SeatConfiguration(models.Model):
 
     def __str__(self) -> str:
         return f"{self.get_seats_class_display()} Configuration ({self.airplane.model_name}"
+
+
+class Flight(models.Model):
+    STATUS_CHOICES = (
+        ("SD", "Scheduled"),
+        ("AD", "Arrived"),
+        ("CD", "Canceled"),
+    )
+    flight_number = models.CharField(max_length=7, unique=True)
+    route = models.ForeignKey(
+        Route,
+        on_delete=models.CASCADE,
+        related_name="flights"
+    )
+    airplane = models.ForeignKey(
+        Airplane,
+        on_delete=models.SET_NULL,
+        related_name="flights",
+        null=True,
+        blank=True
+    )
+    departure_time = models.DateTimeField()
+    arrival_time = models.DateTimeField()
+    status = models.CharField(
+        max_length=2,
+        choices=STATUS_CHOICES,
+        default="SD"
+    )
+    crew = models.OneToOneField(
+        CrewGroup,
+        on_delete=models.SET_NULL,
+        related_name="flight",
+        null=True,
+        blank=True
+    )
+
+    class Meta:
+        ordering = (
+            models.Case(
+                models.When(status="SD", then=0),
+                models.When(status="AD", then=1),
+                models.When(status="CD", then=2),
+                output_field=models.IntegerField()
+            ),
+            "departure_time"
+        )
+
+    def __str__(self) -> str:
+        return (f"Flight {self.flight_number} ({self.route}) "
+                f"{self.departure_time} - {self.arrival_time}")

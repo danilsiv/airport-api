@@ -3,7 +3,7 @@ from django.db import models
 
 class City(models.Model):
     name = models.CharField(max_length=255)
-    country = models.CharField(max_length=255, unique=True)
+    country = models.CharField(max_length=255)
 
     class Meta:
         verbose_name_plural = "cities"
@@ -67,3 +67,31 @@ class CrewMember(models.Model):
 
     def __str__(self) -> str:
         return f"{self.first_name} {self.last_name} ({self.role.name})"
+
+
+class CrewGroup(models.Model):
+    pilots = models.ManyToManyField(
+        CrewMember,
+        related_name="pilot_crew_groups",
+        blank=True
+    )
+    stewards = models.ManyToManyField(
+        CrewMember,
+        related_name="steward_crew_groups",
+        blank=True
+    )
+    technicians = models.ManyToManyField(
+        CrewMember,
+        related_name="technician_crew_groups",
+        blank=True
+    )
+    additional_staff = models.ManyToManyField(
+        CrewMember,
+        related_name="additional_staff_crew_groups",
+        blank=True
+    )
+
+    def __str__(self) -> str:
+        if self.flight:
+            return f"Crew of flight {self.flight.flight_number}"
+        return "Unassigned crew"

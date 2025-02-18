@@ -4,7 +4,7 @@ from django.db import models
 from django.db.models import UniqueConstraint
 from django.core.exceptions import ValidationError
 
-from core.validators import validate_iata_code_format
+from core.validators import validate_iata_code_format, validate_flight_number_format
 
 SEATS_CLASS_CHOICES = [
     ("EC", "Economy Class"),
@@ -203,7 +203,11 @@ class Flight(models.Model):
         ("AD", "Arrived"),
         ("CD", "Canceled"),
     ]
-    flight_number = models.CharField(max_length=7, unique=True)
+    flight_number = models.CharField(
+        max_length=7,
+        validators=[validate_flight_number_format],
+        unique=True
+    )
     route = models.ForeignKey(
         Route,
         on_delete=models.CASCADE,

@@ -135,9 +135,10 @@ class CrewGroup(models.Model):
     )
 
     def __str__(self) -> str:
-        if self.flight:
+        try:
             return f"Crew of flight {self.flight.flight_number}"
-        return "Unassigned crew"
+        except CrewGroup.flight.RelatedObjectDoesNotExist:
+            return "Unassigned crew"
 
 
 class AirplaneType(models.Model):
@@ -248,7 +249,7 @@ class Flight(models.Model):
         )
 
     def clean(self):
-        if self.departure_time < self.arrival_time:
+        if self.departure_time > self.arrival_time:
             raise ValidationError("Departure can`t be later than arrival.")
 
     def save(

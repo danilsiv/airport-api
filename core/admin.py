@@ -36,25 +36,30 @@ class AirplaneAdmin(admin.ModelAdmin):
 
 
 @admin.register(City)
-class ProjectAdmin(admin.ModelAdmin):
+class CityAdmin(admin.ModelAdmin):
     list_display = ("name", "country")
     search_fields = ("name", "country")
 
 
 @admin.register(Airport)
-class ProjectAdmin(admin.ModelAdmin):
+class AirportAdmin(admin.ModelAdmin):
     list_display = ("name", "iata_code", "city")
     search_fields = ("name", "iata_code", "city__name")
     list_filter = ("city__country",)
 
 
 @admin.register(Route)
-class ProjectAdmin(admin.ModelAdmin):
+class RouteAdmin(admin.ModelAdmin):
     list_display = ("source", "destination", "distance")
     search_fields = ("source__city__name", "destination__city__name")
 
 
-admin.site.register(Role)
+@admin.register(Role)
+class RoleAdmin(admin.ModelAdmin):
+    list_display = ("name",)
+    search_fields = ("name",)
+
+
 admin.site.register(CrewMember)
 admin.site.register(CrewGroup)
 admin.site.register(AirplaneType)

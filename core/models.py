@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 
 
@@ -204,3 +205,18 @@ class Flight(models.Model):
     def __str__(self) -> str:
         return (f"Flight {self.flight_number} ({self.route}) "
                 f"{self.departure_time} - {self.arrival_time}")
+
+
+class Order(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="orders"
+    )
+
+    class Meta:
+        ordering = ("-created_at",)
+
+    def __str__(self) -> str:
+        return str(self.created_at)

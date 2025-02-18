@@ -28,11 +28,14 @@ class SeatConfigurationInline(admin.TabularInline):
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
     inlines = (TicketInline,)
+    list_display = ("user", "created_at")
 
 
 @admin.register(Airplane)
 class AirplaneAdmin(admin.ModelAdmin):
     inlines = (SeatConfigurationInline,)
+    list_display = ("model_name", "type")
+    search_fields = ("model_name", "type__name")
 
 
 @admin.register(City)
@@ -100,5 +103,10 @@ class SeatConfigurationAdmin(admin.ModelAdmin):
     list_filter = ("seats_class",)
 
 
-admin.site.register(Flight)
+@admin.register(Flight)
+class FlightAdmin(admin.ModelAdmin):
+    list_display = ("flight_number", "route", "airplane", "status")
+    search_fields = ("flight_number",)
+
+
 admin.site.register(Ticket)

@@ -2,6 +2,13 @@ from django.conf import settings
 from django.db import models
 
 
+SEATS_CLASS_CHOICES = [
+    ("EC", "Economy Class"),
+    ("BC", "Business Class"),
+    ("FC", "First Class"),
+]
+
+
 class City(models.Model):
     name = models.CharField(max_length=255)
     country = models.CharField(max_length=255)
@@ -124,11 +131,6 @@ class Airplane(models.Model):
 
 
 class SeatConfiguration(models.Model):
-    SEATS_CLASS_CHOICES = [
-        ("EC", "Economy Class"),
-        ("BC", "Business Class"),
-        ("FC", "First Class"),
-    ]
     seats_class = models.CharField(
         max_length=2,
         choices=SEATS_CLASS_CHOICES,
@@ -158,11 +160,11 @@ class SeatConfiguration(models.Model):
 
 
 class Flight(models.Model):
-    STATUS_CHOICES = (
+    STATUS_CHOICES = [
         ("SD", "Scheduled"),
         ("AD", "Arrived"),
         ("CD", "Canceled"),
-    )
+    ]
     flight_number = models.CharField(max_length=7, unique=True)
     route = models.ForeignKey(
         Route,
@@ -220,3 +222,28 @@ class Order(models.Model):
 
     def __str__(self) -> str:
         return str(self.created_at)
+
+
+class Ticket(models.Model):
+    row = models.IntegerField()
+    seat = models.IntegerField()
+    passenger_first_name = models.CharField(max_length=255)
+    passenger_last_name = models.CharField(max_length=255)
+    seat_class = models.CharField(
+        max_length=2,
+        choices=SEATS_CLASS_CHOICES,
+        default="EC"
+    )
+    flight = models.ForeignKey(
+        Flight,
+        on_delete=models.CASCADE,
+        related_name="tickets"
+    )
+    order = models.ForeignKey(
+        Order,
+        on_delete=models.CASCADE,
+        related_name="tickets"
+    )
+
+    def __str__(self) -> str:
+        return f"Flight: {self.flight.flight_number} (row: {self.row}, seat: {self.seat})"

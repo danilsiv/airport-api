@@ -93,6 +93,12 @@ class AirplaneTypeAdmin(admin.ModelAdmin):
     search_fields = ("name",)
 
 
-admin.site.register(SeatConfiguration)
+@admin.register(SeatConfiguration)
+class SeatConfigurationAdmin(admin.ModelAdmin):
+    list_display = ("seats_class", "airplane", "rows", "seats_in_row")
+    search_fields = ("airplane__model_name",)
+    list_filter = ("seats_class",)
+
+
 admin.site.register(Flight)
 admin.site.register(Ticket)

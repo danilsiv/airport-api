@@ -4,6 +4,8 @@ from django.db import models
 from django.db.models import UniqueConstraint
 from django.core.exceptions import ValidationError
 
+from core.validators import validate_iata_code_format
+
 SEATS_CLASS_CHOICES = [
     ("EC", "Economy Class"),
     ("BC", "Business Class"),
@@ -24,7 +26,10 @@ class City(models.Model):
 
 class Airport(models.Model):
     name = models.CharField(max_length=255)
-    iata_code = models.CharField(max_length=3, unique=True)
+    iata_code = models.CharField(
+        validators=[validate_iata_code_format],
+        unique=True
+    )
     city = models.ForeignKey(
         City, on_delete=models.CASCADE, related_name="airports"
     )

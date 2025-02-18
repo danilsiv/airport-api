@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.db import models
 from django.db.models import UniqueConstraint
-
+from django.core.exceptions import ValidationError
 
 SEATS_CLASS_CHOICES = [
     ("EC", "Economy Class"),
@@ -165,6 +165,10 @@ class SeatConfiguration(models.Model):
             ),
         )
 
+    @property
+    def num_of_seats(self):
+        return self.rows * self.seats_in_row
+
     def __str__(self) -> str:
         return f"{self.get_seats_class_display()} Configuration ({self.airplane.model_name}"
 
@@ -258,10 +262,42 @@ class Ticket(models.Model):
     class Meta:
         constraints = (
             UniqueConstraint(
-                fields=["flight", "seat_class", "row", "seat"],
-                name="unique"
+                fields=["flight", "seat_class", "seat"],
+                name="unique_flight_seat"
             )
         )
+        ordering = ("seat",)
+
+    def clean(self) -> None:
+        if not self.flight.airplane:
+            raise ValidationError("No airplane has been assigned to  this flight yet.")
+
+        seat_configuration = self.flight.airplane.seats_configuration.filter(
+            seats_class=self.seat_class
+        ).first()
+
+        if not seat_configuration:
+            raise ValidationError(f"Seat configuration for {self.seat_class} not found.")
+
+        max_seats = seat_configuration.num_of_seats
+        max_rows = seat_configuration.rows
+
+        if not (1 <= self.seat <= max_seats):
+            raise ValidationError(f"Seat must be in range [1, {max_seats}].")
+
+        if not (1 <= self.row <= max_rows):
+            raise ValidationError(f"Row must be in range [1, {max_rows}].")
+
+    def save(
+        self,
+        *args,
+        force_insert=False,
+        force_update=False,
+        using=None,
+        update_fields=None,
+    ):
+        self.full_clean()
+        return super(Ticket, self).save(force_insert, force_update, using, update_fields)
 
     def __str__(self) -> str:
         return f"Flight: {self.flight.flight_number} (row: {self.row}, seat: {self.seat})"

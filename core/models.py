@@ -27,6 +27,7 @@ class City(models.Model):
 class Airport(models.Model):
     name = models.CharField(max_length=255)
     iata_code = models.CharField(
+        max_length=3,
         validators=[validate_iata_code_format],
         unique=True
     )
@@ -62,7 +63,7 @@ class Route(models.Model):
             UniqueConstraint(
                 fields=["source", "destination"],
                 name="unique_route_source_destination"
-            )
+            ),
         )
         ordering = ("source",)
 
@@ -307,7 +308,7 @@ class Ticket(models.Model):
             UniqueConstraint(
                 fields=["flight", "seat_class", "seat"],
                 name="unique_flight_seat"
-            )
+            ),
         )
         ordering = ("seat",)
 

@@ -60,7 +60,17 @@ class RoleAdmin(admin.ModelAdmin):
     search_fields = ("name",)
 
 
-admin.site.register(CrewMember)
+@admin.register(CrewMember)
+class CrewMemberAdmin(admin.ModelAdmin):
+    list_display = ("full_name", "role")
+    list_filter = ("role__name",)
+
+    def full_name(self, obj) -> str:
+        return f"{obj.first_name} {obj.last_name}"
+
+    full_name.short_description = "full_name"
+
+
 admin.site.register(CrewGroup)
 admin.site.register(AirplaneType)
 admin.site.register(SeatConfiguration)

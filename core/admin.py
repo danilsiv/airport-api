@@ -35,7 +35,12 @@ class AirplaneAdmin(admin.ModelAdmin):
     inlines = (SeatConfigurationInline,)
 
 
-admin.site.register(City)
+@admin.register(City)
+class ProjectAdmin(admin.ModelAdmin):
+    list_display = ("name", "country")
+    search_fields = ("name", "country")
+
+
 admin.site.register(Airport)
 admin.site.register(Route)
 admin.site.register(Role)

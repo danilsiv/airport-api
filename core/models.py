@@ -255,5 +255,13 @@ class Ticket(models.Model):
         related_name="tickets"
     )
 
+    class Meta:
+        constraints = (
+            UniqueConstraint(
+                fields=["flight", "seat_class", "row", "seat"],
+                name="unique"
+            )
+        )
+
     def __str__(self) -> str:
         return f"Flight: {self.flight.flight_number} (row: {self.row}, seat: {self.seat})"

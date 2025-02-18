@@ -20,10 +20,19 @@ class TicketInline(admin.TabularInline):
     extra = 1
 
 
+class SeatConfigurationInline(admin.TabularInline):
+    model = SeatConfiguration
+    extra = 1
+
+
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
     inlines = (TicketInline,)
 
+
+@admin.register(Airplane)
+class AirplaneAdmin(admin.ModelAdmin):
+    inlines = (SeatConfigurationInline,)
 
 
 admin.site.register(City)
@@ -33,8 +42,6 @@ admin.site.register(Role)
 admin.site.register(CrewMember)
 admin.site.register(CrewGroup)
 admin.site.register(AirplaneType)
-admin.site.register(Airplane)
 admin.site.register(SeatConfiguration)
 admin.site.register(Flight)
-admin.site.register(Order)
 admin.site.register(Ticket)

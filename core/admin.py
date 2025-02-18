@@ -109,4 +109,13 @@ class FlightAdmin(admin.ModelAdmin):
     search_fields = ("flight_number",)
 
 
-admin.site.register(Ticket)
+@admin.register(Ticket)
+class TicketAdmin(admin.ModelAdmin):
+    list_display = ("passenger_full_name", "flight__route", "seat_class")
+    search_fields = ("flight__flight_number",)
+    list_filter = ("seat_class",)
+
+    def passenger_full_name(self, obj) -> str:
+        return f"{obj.passenger_first_name} {obj.passenger_last_name}"
+
+    passenger_full_name.short_description = "passenger_full_name"

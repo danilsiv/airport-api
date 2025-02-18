@@ -87,7 +87,12 @@ class CrewGroupAdmin(admin.ModelAdmin):
         return super().formfield_for_manytomany(db_field, request, **kwargs)
 
 
-admin.site.register(AirplaneType)
+@admin.register(AirplaneType)
+class AirplaneTypeAdmin(admin.ModelAdmin):
+    list_display = ("name",)
+    search_fields = ("name",)
+
+
 admin.site.register(SeatConfiguration)
 admin.site.register(Flight)
 admin.site.register(Ticket)

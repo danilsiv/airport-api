@@ -45,9 +45,15 @@ class ProjectAdmin(admin.ModelAdmin):
 class ProjectAdmin(admin.ModelAdmin):
     list_display = ("name", "iata_code", "city")
     search_fields = ("name", "iata_code", "city__name")
+    list_filter = ("city__country",)
 
 
-admin.site.register(Route)
+@admin.register(Route)
+class ProjectAdmin(admin.ModelAdmin):
+    list_display = ("source", "destination", "distance")
+    search_fields = ("source__city__name", "destination__city__name")
+
+
 admin.site.register(Role)
 admin.site.register(CrewMember)
 admin.site.register(CrewGroup)

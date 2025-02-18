@@ -71,7 +71,22 @@ class CrewMemberAdmin(admin.ModelAdmin):
     full_name.short_description = "full_name"
 
 
-admin.site.register(CrewGroup)
+@admin.register(CrewGroup)
+class CrewGroupAdmin(admin.ModelAdmin):
+    def formfield_for_manytomany(self, db_field, request, **kwargs):
+        if db_field.name == "pilots":
+            kwargs["queryset"] = CrewMember.objects.filter(role__name="Pilot")
+        elif db_field.name == "stewards":
+            kwargs["queryset"] = CrewMember.objects.filter(role__name="Steward")
+        elif db_field.name == "technicians":
+            kwargs["queryset"] = CrewMember.objects.filter(role__name="Technician")
+        elif db_field.name == "additional_staff":
+            kwargs["queryset"] = CrewMember.objects.exclude(
+                role__name__in=("Pilot", "Steward", "Technician")
+            )
+        return super().formfield_for_manytomany(db_field, request, **kwargs)
+
+
 admin.site.register(AirplaneType)
 admin.site.register(SeatConfiguration)
 admin.site.register(Flight)

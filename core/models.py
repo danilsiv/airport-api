@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import UniqueConstraint
 from django.core.exceptions import ValidationError
@@ -46,7 +47,10 @@ class Route(models.Model):
         on_delete=models.CASCADE,
         related_name="arriving_routes"
     )
-    distance = models.IntegerField()
+    distance = models.IntegerField(
+        validators=[MinValueValidator(1)],
+        help_text="Distance in kilometers"
+    )
 
     class Meta:
         constraints = (
@@ -56,6 +60,21 @@ class Route(models.Model):
             )
         )
         ordering = ("source",)
+
+    def clean(self) -> None:
+        if self.source == self.destination:
+            raise ValidationError("The source can`t equal destination.")
+
+    def save(
+        self,
+        *args,
+        force_insert=False,
+        force_update=False,
+        using=None,
+        update_fields=None,
+    ):
+        self.full_clean()
+        return super(Route, self).save(force_insert, force_update, using, update_fields)
 
     def __str__(self) -> str:
         return f"{self.source.name} - {self.destination.name}"
@@ -146,8 +165,8 @@ class SeatConfiguration(models.Model):
         choices=SEATS_CLASS_CHOICES,
         default="EC"
     )
-    rows = models.IntegerField()
-    seats_in_row = models.IntegerField()
+    rows = models.IntegerField(validators=[MinValueValidator(1)])
+    seats_in_row = models.IntegerField(validators=[MinValueValidator(1)])
     airplane = models.ForeignKey(
         Airplane,
         on_delete=models.CASCADE,
@@ -170,7 +189,7 @@ class SeatConfiguration(models.Model):
         return self.rows * self.seats_in_row
 
     def __str__(self) -> str:
-        return f"{self.get_seats_class_display()} Configuration ({self.airplane.model_name}"
+        return f"{self.get_seats_class_display()} Configuration ({self.airplane.model_name})"
 
 
 class Flight(models.Model):
@@ -217,6 +236,21 @@ class Flight(models.Model):
             ),
             "departure_time"
         )
+
+    def clean(self):
+        if self.departure_time < self.arrival_time:
+            raise ValidationError("Departure can`t be later than arrival.")
+
+    def save(
+        self,
+        *args,
+        force_insert=False,
+        force_update=False,
+        using=None,
+        update_fields=None,
+    ):
+        self.full_clean()
+        return super(Flight, self).save(force_insert, force_update, using, update_fields)
 
     def __str__(self) -> str:
         return (f"Flight {self.flight_number} ({self.route}) "

@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.db import models
+from django.db.models import UniqueConstraint
 
 
 SEATS_CLASS_CHOICES = [
@@ -46,6 +47,15 @@ class Route(models.Model):
         related_name="arriving_routes"
     )
     distance = models.IntegerField()
+
+    class Meta:
+        constraints = (
+            UniqueConstraint(
+                fields=["source", "destination"],
+                name="unique_route_source_destination"
+            )
+        )
+        ordering = ("source",)
 
     def __str__(self) -> str:
         return f"{self.source.name} - {self.destination.name}"

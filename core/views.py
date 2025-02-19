@@ -3,7 +3,7 @@ from rest_framework import viewsets
 from rest_framework import generics
 
 
-from core.models import City, Airport, Route, Role
+from core.models import City, Airport, Route, Role, CrewMember
 from core.serializers import (
     CitySerializer,
     AirportSerializer,
@@ -12,7 +12,10 @@ from core.serializers import (
     RouteSerializer,
     RouteListSerializer,
     RouteRetrieveSerializer,
-    RoleSerializer
+    RoleSerializer,
+    CrewMemberSerializer,
+    CrewMemberListSerializer,
+    CrewMemberRetrieveSerializer,
 )
 
 
@@ -72,3 +75,28 @@ class RouteViewSet(viewsets.ModelViewSet):
 class RoleListView(generics.ListCreateAPIView):
     queryset = Role.objects.all()
     serializer_class = RoleSerializer
+
+
+class CrewMemberViewSet(viewsets.ModelViewSet):
+    queryset = CrewMember.objects.all()
+    serializer_class = CrewMemberSerializer
+
+    def get_serializer_class(self) -> type:
+        if self.action == "list":
+            return CrewMemberListSerializer
+        if self.action == "retrieve":
+            return CrewMemberRetrieveSerializer
+
+        return CrewMemberSerializer
+
+    def get_queryset(self) -> QuerySet:
+        queryset = self.queryset
+
+        role = self.request.query_params.get("role")
+        if role:
+            queryset = queryset.filter(role__name__icontains=role)
+
+        if self.action in ("list", "retrieve"):
+            queryset = queryset.select_related("role")
+
+        return queryset

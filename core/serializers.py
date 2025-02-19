@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from core.models import City, Airport, Route, Role
+from core.models import City, Airport, Route, Role, CrewMember
 
 
 class CitySerializer(serializers.ModelSerializer):
@@ -54,3 +54,20 @@ class RoleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Role
         fields = ("id", "name")
+
+
+class CrewMemberSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CrewMember
+        fields = ("id", "first_name", "last_name", "role")
+
+
+class CrewMemberListSerializer(CrewMemberSerializer):
+    role = serializers.SlugRelatedField(
+        read_only=True,
+        slug_field="name"
+    )
+
+
+class CrewMemberRetrieveSerializer(CrewMemberSerializer):
+    role = RoleSerializer()

@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from core.models import City, Airport, Route
+from core.models import City, Airport, Route, Role
 
 
 class CitySerializer(serializers.ModelSerializer):
@@ -48,3 +48,9 @@ class RouteListSerializer(RouteSerializer):
 class RouteRetrieveSerializer(RouteSerializer):
     source = AirportRetrieveSerializer()
     destination = AirportRetrieveSerializer()
+
+
+class RoleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Role
+        fields = ("id", "name")

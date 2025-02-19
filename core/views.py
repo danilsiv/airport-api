@@ -1,8 +1,9 @@
 from django.db.models import QuerySet
 from rest_framework import viewsets
+from rest_framework import generics
 
 
-from core.models import City, Airport, Route
+from core.models import City, Airport, Route, Role
 from core.serializers import (
     CitySerializer,
     AirportSerializer,
@@ -11,6 +12,7 @@ from core.serializers import (
     RouteSerializer,
     RouteListSerializer,
     RouteRetrieveSerializer,
+    RoleSerializer
 )
 
 
@@ -65,3 +67,8 @@ class RouteViewSet(viewsets.ModelViewSet):
             )
 
         return queryset
+
+
+class RoleListView(generics.ListCreateAPIView):
+    queryset = Role.objects.all()
+    serializer_class = RoleSerializer

@@ -5,6 +5,7 @@ from core.views import (
     CityViewSet,
     AirportViewSet,
     RouteViewSet,
+    RoleListView,
 )
 
 
@@ -17,6 +18,7 @@ router.register("routes", RouteViewSet)
 
 urlpatterns = [
     path("", include(router.urls)),
+    path("roles/", RoleListView.as_view(), name="role_list"),
 ]
 
 app_name = "core"

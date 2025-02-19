@@ -67,9 +67,21 @@ class Route(models.Model):
         )
         ordering = ("source",)
 
+    @staticmethod
+    def validate_source_and_destination(
+            source: Airport,
+            destination: Airport,
+            error_to_raise
+    ) -> None:
+        if source == destination:
+            raise error_to_raise("The source can`t equal destination.")
+
     def clean(self) -> None:
-        if self.source == self.destination:
-            raise ValidationError("The source can`t equal destination.")
+        Route.validate_source_and_destination(
+            self.source,
+            self.destination,
+            ValidationError
+        )
 
     def save(
         self,

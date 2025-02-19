@@ -1,6 +1,6 @@
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 
-from core.validators import validate_iata_code_format
 from core.models import City, Airport, Route
 
 
@@ -14,7 +14,6 @@ class AirportSerializer(serializers.ModelSerializer):
     class Meta:
         model = Airport
         fields = ("id", "name", "iata_code", "city")
-        validators = [validate_iata_code_format]
 
 
 class AirportListSerializer(AirportSerializer):
@@ -32,6 +31,13 @@ class RouteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Route
         fields = ("id", "source", "destination", "distance")
+
+    def validate(self, attrs) -> None:
+        Route.validate_source_and_destination(
+            attrs["source"],
+            attrs["destination"],
+            ValidationError
+        )
 
 
 class RouteListSerializer(RouteSerializer):

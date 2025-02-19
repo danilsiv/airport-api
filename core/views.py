@@ -64,6 +64,22 @@ class RouteViewSet(viewsets.ModelViewSet):
     def get_queryset(self) -> QuerySet:
         queryset = self.queryset
 
+        source_name = self.request.query_params.get("source_name")
+        if source_name:
+            queryset = queryset.filter(source__name=source_name)
+
+        destination_name = self.request.query_params.get("destination_name")
+        if destination_name:
+            queryset = queryset.filter(destination__name=destination_name)
+
+        source_iata = self.request.query_params.get("source_iata")
+        if source_iata:
+            queryset = queryset.filter(source__iata_code=source_iata)
+
+        destination_iata = self.request.query_params.get("destination_iata")
+        if destination_iata:
+            queryset = queryset.filter(destination__iata_code=destination_iata)
+
         if self.action in ("list", "retrieve"):
             queryset = queryset.select_related(
                 "source__city", "destination__city"

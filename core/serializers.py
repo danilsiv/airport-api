@@ -101,3 +101,26 @@ class CrewGroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = CrewGroup
         fields = ("id", "__str__", "pilots", "stewards", "technicians", "additional_staff")
+
+
+class CrewGroupListSerializer(CrewGroupSerializer):
+    pilots = serializers.SlugRelatedField(
+        many=True,
+        read_only=True,
+        slug_field="full_name"
+    )
+    stewards = serializers.SlugRelatedField(
+        many=True,
+        read_only=True,
+        slug_field="full_name"
+    )
+    technicians = serializers.SlugRelatedField(
+        many=True,
+        read_only=True,
+        slug_field="full_name"
+    )
+    additional_staff = serializers.SlugRelatedField(
+        many=True,
+        read_only=True,
+        slug_field="full_name"
+    )

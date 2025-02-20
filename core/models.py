@@ -120,6 +120,10 @@ class CrewMember(models.Model):
     class Meta:
         ordering = ("role__name", "first_name")
 
+    @property
+    def full_name(self) -> str:
+        return f"{self.first_name} {self.last_name}"
+
     def __str__(self) -> str:
         return f"{self.first_name} {self.last_name} ({self.role.name})"
 

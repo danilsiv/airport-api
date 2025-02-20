@@ -3,7 +3,14 @@ from rest_framework import viewsets
 from rest_framework import generics
 
 
-from core.models import City, Airport, Route, Role, CrewMember
+from core.models import (
+    City,
+    Airport,
+    Route,
+    Role,
+    CrewMember,
+    CrewGroup,
+)
 from core.serializers import (
     CitySerializer,
     AirportSerializer,
@@ -16,6 +23,9 @@ from core.serializers import (
     CrewMemberSerializer,
     CrewMemberListSerializer,
     CrewMemberRetrieveSerializer,
+    CrewGroupSerializer,
+    CrewGroupListSerializer,
+    CrewGroupRetrieveSerializer,
 )
 
 
@@ -116,3 +126,26 @@ class CrewMemberViewSet(viewsets.ModelViewSet):
             queryset = queryset.select_related("role")
 
         return queryset
+
+
+class CrewGroupViewSet(viewsets.ModelViewSet):
+    queryset = CrewGroup.objects.all()
+    serializer_class = CrewGroupSerializer
+
+    def get_serializer_class(self) -> type:
+        if self.action == "list":
+            return CrewGroupListSerializer
+        if self.action == "retrieve":
+            return CrewGroupRetrieveSerializer
+
+        return self.serializer_class
+
+    def get_queryset(self):
+        if self.action in ("list", "retrieve"):
+            return self.queryset.select_related().prefetch_related(
+                "pilots__role",
+                "stewards__role",
+                "technicians__role",
+                "additional_staff__role",
+            )
+        return self.queryset

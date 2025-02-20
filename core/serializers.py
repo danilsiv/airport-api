@@ -124,3 +124,10 @@ class CrewGroupListSerializer(CrewGroupSerializer):
         read_only=True,
         slug_field="full_name"
     )
+
+
+class CrewGroupRetrieveSerializer(CrewGroupSerializer):
+    pilots = CrewMemberSerializer(many=True)
+    stewards = CrewMemberSerializer(many=True)
+    technicians = CrewGroupSerializer(many=True)
+    additional_staff = CrewMemberSerializer(many=True)

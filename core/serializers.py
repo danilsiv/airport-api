@@ -1,7 +1,14 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from core.models import City, Airport, Route, Role, CrewMember
+from core.models import (
+    City,
+    Airport,
+    Route,
+    Role,
+    CrewMember,
+    CrewGroup,
+)
 
 
 class CitySerializer(serializers.ModelSerializer):
@@ -71,3 +78,26 @@ class CrewMemberListSerializer(CrewMemberSerializer):
 
 class CrewMemberRetrieveSerializer(CrewMemberSerializer):
     role = RoleSerializer()
+
+
+class CrewGroupSerializer(serializers.ModelSerializer):
+    pilots = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=CrewMember.objects.filter(role__name="Pilot")
+    )
+    stewards = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=CrewMember.objects.filter(role__name="Steward")
+    )
+    technicians = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=CrewMember.objects.filter(role__name="Technician")
+    )
+    additional_staff = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=CrewMember.objects.none()
+    )
+
+    class Meta:
+        model = CrewGroup
+        fields = ("id", "__str__", "pilots", "stewards", "technicians", "additional_staff")

@@ -140,8 +140,8 @@ class CrewGroupViewSet(viewsets.ModelViewSet):
 
         return self.serializer_class
 
-    def get_queryset(self):
-        if self.action in ("list", "retrieve"):
+    def get_queryset(self) -> QuerySet:
+        if self.action in ("retrieve", "list"):
             return self.queryset.select_related().prefetch_related(
                 "pilots__role",
                 "stewards__role",

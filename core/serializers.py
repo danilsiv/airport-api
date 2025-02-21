@@ -83,24 +83,48 @@ class CrewMemberRetrieveSerializer(CrewMemberSerializer):
 class CrewGroupSerializer(serializers.ModelSerializer):
     pilots = serializers.PrimaryKeyRelatedField(
         many=True,
-        queryset=CrewMember.objects.filter(role__name="Pilot")
+        queryset=CrewMember.objects
+        .select_related("role")
+        .filter(role__name__in=("Captain", "First Officer", "Relief Pilot"))
     )
     stewards = serializers.PrimaryKeyRelatedField(
         many=True,
-        queryset=CrewMember.objects.filter(role__name="Steward")
+        queryset=CrewMember.objects
+        .select_related("role")
+        .filter(role__name__in=("Purser", "Lead Flight Attendant", "Flight Attendant"))
     )
     technicians = serializers.PrimaryKeyRelatedField(
         many=True,
-        queryset=CrewMember.objects.filter(role__name="Technician")
+        queryset=CrewMember.objects
+        .select_related("role")
+        .filter(role__name__in=("Aircraft Mechanic", "Avionics Technician"))
     )
     additional_staff = serializers.PrimaryKeyRelatedField(
         many=True,
-        queryset=CrewMember.objects.none()
+        queryset=CrewMember.objects
+        .select_related("role")
+        .exclude(role__name__in=(
+            "Captain",
+            "First Officer",
+            "Relief Pilot",
+            "Purser",
+            "Lead Flight Attendant",
+            "Flight Attendant",
+            "Aircraft Mechanic",
+            "Avionics Technician"
+        ))
     )
 
     class Meta:
         model = CrewGroup
-        fields = ("id", "__str__", "pilots", "stewards", "technicians", "additional_staff")
+        fields = (
+            "id",
+            "__str__",
+            "pilots",
+            "stewards",
+            "technicians",
+            "additional_staff"
+        )
 
 
 class CrewGroupListSerializer(CrewGroupSerializer):
@@ -127,7 +151,7 @@ class CrewGroupListSerializer(CrewGroupSerializer):
 
 
 class CrewGroupRetrieveSerializer(CrewGroupSerializer):
-    pilots = CrewMemberSerializer(many=True)
-    stewards = CrewMemberSerializer(many=True)
-    technicians = CrewGroupSerializer(many=True)
-    additional_staff = CrewMemberSerializer(many=True)
+    pilots = CrewMemberRetrieveSerializer(many=True)
+    stewards = CrewMemberRetrieveSerializer(many=True)
+    technicians = CrewMemberRetrieveSerializer(many=True)
+    additional_staff = CrewMemberRetrieveSerializer(many=True)

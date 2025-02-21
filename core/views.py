@@ -11,6 +11,7 @@ from core.models import (
     CrewMember,
     CrewGroup,
     AirplaneType,
+    Airplane,
 )
 from core.serializers import (
     CitySerializer,
@@ -28,6 +29,9 @@ from core.serializers import (
     CrewGroupListSerializer,
     CrewGroupRetrieveSerializer,
     AirplaneTypeSerializer,
+    AirplaneSerializer,
+    AirplaneListSerializer,
+    AirplaneRetrieveSerializer,
 )
 
 
@@ -156,3 +160,32 @@ class CrewGroupViewSet(viewsets.ModelViewSet):
 class AirplaneTypeListView(generics.ListCreateAPIView):
     queryset = AirplaneType.objects.all()
     serializer_class = AirplaneTypeSerializer
+
+
+class AirplaneViewSet(viewsets.ModelViewSet):
+    queryset = Airplane.objects.all()
+    serializer_class = AirplaneSerializer
+
+    def get_serializer_class(self) -> type:
+        if self.action == "list":
+            return AirplaneListSerializer
+        if self.action == "retrieve":
+            return AirplaneRetrieveSerializer
+
+        return AirplaneSerializer
+
+    def get_queryset(self) -> QuerySet:
+        queryset = self.queryset
+
+        model_name = self.request.query_params.get("name")
+        if model_name:
+            queryset = queryset.filter(model_name__icontains=model_name)
+
+        model_type = self.request.query_params.get("type")
+        if model_type:
+            queryset = queryset.filter(type__name__icontains=model_type)
+
+        if self.action in ("list", "retrieve"):
+            return queryset.select_related()
+
+        return queryset

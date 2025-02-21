@@ -10,6 +10,7 @@ from core.models import (
     Role,
     CrewMember,
     CrewGroup,
+    AirplaneType,
 )
 from core.serializers import (
     CitySerializer,
@@ -26,6 +27,7 @@ from core.serializers import (
     CrewGroupSerializer,
     CrewGroupListSerializer,
     CrewGroupRetrieveSerializer,
+    AirplaneTypeSerializer,
 )
 
 
@@ -149,3 +151,8 @@ class CrewGroupViewSet(viewsets.ModelViewSet):
                 "additional_staff__role",
             )
         return self.queryset
+
+
+class AirplaneTypeListView(generics.ListCreateAPIView):
+    queryset = AirplaneType.objects.all()
+    serializer_class = AirplaneTypeSerializer

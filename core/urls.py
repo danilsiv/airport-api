@@ -8,6 +8,7 @@ from core.views import (
     RoleListView,
     CrewMemberViewSet,
     CrewGroupViewSet,
+    AirplaneTypeListView,
 )
 
 
@@ -23,6 +24,11 @@ router.register("crew-groups", CrewGroupViewSet)
 urlpatterns = [
     path("", include(router.urls)),
     path("roles/", RoleListView.as_view(), name="role_list"),
+    path(
+        "airplane-types/",
+        AirplaneTypeListView.as_view(),
+        name="airplane_type_list"
+    )
 ]
 
 app_name = "core"

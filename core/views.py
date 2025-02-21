@@ -12,6 +12,7 @@ from core.models import (
     CrewGroup,
     AirplaneType,
     Airplane,
+    SeatConfiguration,
 )
 from core.serializers import (
     CitySerializer,
@@ -32,6 +33,9 @@ from core.serializers import (
     AirplaneSerializer,
     AirplaneListSerializer,
     AirplaneRetrieveSerializer,
+    SeatConfigurationSerializer,
+    SeatConfigurationListSerializer,
+    SeatConfigurationRetrieveSerializer,
 )
 
 
@@ -50,7 +54,7 @@ class AirportViewSet(viewsets.ModelViewSet):
         if self.action == "retrieve":
             return AirportRetrieveSerializer
 
-        return AirportSerializer
+        return self.serializer_class
 
     def get_queryset(self) -> QuerySet:
         queryset = self.queryset
@@ -75,7 +79,7 @@ class RouteViewSet(viewsets.ModelViewSet):
         if self.action == "retrieve":
             return RouteRetrieveSerializer
 
-        return RouteSerializer
+        return self.serializer_class
 
     def get_queryset(self) -> QuerySet:
         queryset = self.queryset
@@ -119,7 +123,7 @@ class CrewMemberViewSet(viewsets.ModelViewSet):
         if self.action == "retrieve":
             return CrewMemberRetrieveSerializer
 
-        return CrewMemberSerializer
+        return self.serializer_class
 
     def get_queryset(self) -> QuerySet:
         queryset = self.queryset
@@ -172,7 +176,7 @@ class AirplaneViewSet(viewsets.ModelViewSet):
         if self.action == "retrieve":
             return AirplaneRetrieveSerializer
 
-        return AirplaneSerializer
+        return self.serializer_class
 
     def get_queryset(self) -> QuerySet:
         queryset = self.queryset
@@ -184,6 +188,33 @@ class AirplaneViewSet(viewsets.ModelViewSet):
         model_type = self.request.query_params.get("type")
         if model_type:
             queryset = queryset.filter(type__name__icontains=model_type)
+
+        if self.action in ("list", "retrieve"):
+            return queryset.select_related()
+
+        return queryset
+
+
+class SeatConfigurationViewSet(viewsets.ModelViewSet):
+    queryset = SeatConfiguration.objects.all()
+    serializer_class = SeatConfigurationSerializer
+
+    def get_serializer_class(self) -> type:
+        if self.action == "list":
+            return SeatConfigurationListSerializer
+        if self.action == "retrieve":
+            return SeatConfigurationRetrieveSerializer
+
+        return self.serializer_class
+
+    def get_queryset(self) -> QuerySet:
+        queryset = self.queryset
+
+        airplane = self.request.query_params.get("airplane")
+        if airplane:
+            queryset = queryset.filter(
+                airplane__model_name__icontains=airplane
+            )
 
         if self.action in ("list", "retrieve"):
             return queryset.select_related()

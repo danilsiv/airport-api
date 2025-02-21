@@ -10,6 +10,7 @@ from core.views import (
     CrewGroupViewSet,
     AirplaneTypeListView,
     AirplaneViewSet,
+    SeatConfigurationViewSet,
 )
 
 
@@ -21,6 +22,7 @@ router.register("routes", RouteViewSet)
 router.register("crew-members", CrewMemberViewSet)
 router.register("crew-groups", CrewGroupViewSet)
 router.register("airplanes", AirplaneViewSet)
+router.register("seat-configurations", SeatConfigurationViewSet)
 
 
 urlpatterns = [

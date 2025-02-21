@@ -7,7 +7,7 @@ from core.models import (
     Route,
     Role,
     CrewMember,
-    CrewGroup,
+    CrewGroup, AirplaneType,
 )
 
 
@@ -155,3 +155,9 @@ class CrewGroupRetrieveSerializer(CrewGroupSerializer):
     stewards = CrewMemberRetrieveSerializer(many=True)
     technicians = CrewMemberRetrieveSerializer(many=True)
     additional_staff = CrewMemberRetrieveSerializer(many=True)
+
+
+class AirplaneTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AirplaneType
+        fields = ("id", "name")

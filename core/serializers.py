@@ -10,6 +10,7 @@ from core.models import (
     CrewGroup,
     AirplaneType,
     Airplane,
+    SeatConfiguration,
 )
 
 
@@ -181,3 +182,24 @@ class AirplaneListSerializer(AirplaneSerializer):
 
 class AirplaneRetrieveSerializer(AirplaneSerializer):
     type = AirplaneTypeSerializer()
+
+
+class SeatConfigurationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SeatConfiguration
+        fields = ("id", "seats_class", "rows", "seats_in_row", "airplane")
+
+
+class SeatConfigurationListSerializer(SeatConfigurationSerializer):
+    seats_class = serializers.CharField(
+        source="get_seats_class_display",
+        read_only=True
+    )
+    airplane = serializers.SlugRelatedField(
+        read_only=True,
+        slug_field="model_name"
+    )
+
+
+class SeatConfigurationRetrieveSerializer(SeatConfigurationListSerializer):
+    airplane = AirplaneListSerializer()

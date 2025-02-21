@@ -7,7 +7,9 @@ from core.models import (
     Route,
     Role,
     CrewMember,
-    CrewGroup, AirplaneType,
+    CrewGroup,
+    AirplaneType,
+    Airplane,
 )
 
 
@@ -161,3 +163,21 @@ class AirplaneTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = AirplaneType
         fields = ("id", "name")
+
+
+
+class AirplaneSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Airplane
+        fields = ("id", "model_name", "type")
+
+
+class AirplaneListSerializer(AirplaneSerializer):
+    type = serializers.SlugRelatedField(
+        read_only=True,
+        slug_field="name"
+    )
+
+
+class AirplaneRetrieveSerializer(AirplaneSerializer):
+    type = AirplaneTypeSerializer()

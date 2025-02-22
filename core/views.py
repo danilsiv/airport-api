@@ -3,6 +3,7 @@ from rest_framework import viewsets
 from rest_framework import generics
 
 
+from core.validators import validate_seat_class
 from core.models import (
     City,
     Airport,
@@ -36,6 +37,7 @@ from core.serializers import (
     SeatConfigurationSerializer,
     SeatConfigurationListSerializer,
     SeatConfigurationRetrieveSerializer,
+    SeatConfigurationFilterSerializer,
 )
 
 
@@ -190,7 +192,7 @@ class AirplaneViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(type__name__icontains=model_type)
 
         if self.action in ("list", "retrieve"):
-            return queryset.select_related()
+            return queryset.select_related().prefetch_related("seats_configuration")
 
         return queryset
 
@@ -210,11 +212,17 @@ class SeatConfigurationViewSet(viewsets.ModelViewSet):
     def get_queryset(self) -> QuerySet:
         queryset = self.queryset
 
-        airplane = self.request.query_params.get("airplane")
-        if airplane:
-            queryset = queryset.filter(
-                airplane__model_name__icontains=airplane
-            )
+        filter_serializer = SeatConfigurationFilterSerializer(
+            data=self.request.query_params
+        )
+        filter_serializer.is_valid(raise_exception=True)
+        filters = filter_serializer.validated_data
+
+        if "airplane" in filters:
+            queryset = queryset.filter(airplane__model_name=filters["airplane"])
+
+        if "seats_class" in filters:
+            queryset = queryset.filter(seats_class=filters["seats_class"])
 
         if self.action in ("list", "retrieve"):
             return queryset.select_related()

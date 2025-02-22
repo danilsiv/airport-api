@@ -2,6 +2,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from django.db import transaction
 
+from core.validators import validate_seat_class
 from core.models import (
     City,
     Airport,
@@ -275,5 +276,17 @@ class SeatConfigurationListSerializer(SeatConfigurationSerializer):
 
 class SeatConfigurationRetrieveSerializer(SeatConfigurationListSerializer):
     airplane = AirplaneSeatConfigurationRetrieveSerializer()
+
+
+class SeatConfigurationFilterSerializer(serializers.ModelSerializer):
+    seats_class = serializers.CharField(
+        required=False,
+        validators=[validate_seat_class]
+    )
+    airplane = serializers.CharField(required=False)
+
+    class Meta:
+        model = SeatConfiguration
+        fields = ("seats_class", "airplane")
 
 # --------------------------------------------------------------------

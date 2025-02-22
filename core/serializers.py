@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
+from django.db import transaction
 
 from core.models import (
     City,
@@ -167,10 +168,44 @@ class AirplaneTypeSerializer(serializers.ModelSerializer):
         fields = ("id", "name")
 
 
+class SeatConfigurationAirplaneSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SeatConfiguration
+        fields = ("id", "seats_class", "rows", "seats_in_row")
+
+
 class AirplaneSerializer(serializers.ModelSerializer):
+    seats_configuration = SeatConfigurationAirplaneSerializer(many=True)
     class Meta:
         model = Airplane
-        fields = ("id", "model_name", "type")
+        fields = ("id", "model_name", "type", "seats_configuration")
+
+    def create(self, validated_data) -> Airplane:
+        with transaction.atomic():
+            configurations_data = validated_data.pop("seats_configuration", None)
+            airplane = Airplane.objects.create(**validated_data)
+            SeatConfiguration.objects.bulk_create([
+                SeatConfiguration(airplane=airplane, **conf)
+                for conf in configurations_data
+            ])
+
+            return airplane
+
+    def update(self, instance, validated_data) -> Airplane:
+        with transaction.atomic():
+            instance.model_name = validated_data.get("model_name", instance.model_name)
+            instance.type = validated_data.get("type", instance.type)
+            instance.save()
+
+            configurations_data = validated_data.pop("seats_configuration", [])
+
+            instance.seats_configuration.all().delete()
+            SeatConfiguration.objects.bulk_create([
+                SeatConfiguration(airplane=instance, **conf)
+                for conf in configurations_data
+            ])
+
+            return instance
 
 
 class AirplaneListSerializer(AirplaneSerializer):

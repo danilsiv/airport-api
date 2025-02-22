@@ -168,10 +168,32 @@ class AirplaneTypeSerializer(serializers.ModelSerializer):
         fields = ("id", "name")
 
 
+# SeatConfiguration serializers for Airplane model (without 'airplane' field)
+
 class SeatConfigurationAirplaneSerializer(serializers.ModelSerializer):
     class Meta:
         model = SeatConfiguration
         fields = ("id", "seats_class", "rows", "seats_in_row")
+
+
+class SeatConfigurationAirplaneListSerializer(serializers.ModelSerializer):
+    seats_class = serializers.CharField(
+        source="get_seats_class_display",
+        read_only=True
+    )
+
+    class Meta:
+        model = SeatConfiguration
+        fields = ("seats_class", "num_of_seats")
+
+
+class SeatConfigurationAirplaneRetrieveSerializer(SeatConfigurationAirplaneSerializer):
+    seats_class = serializers.CharField(
+        source="get_seats_class_display",
+        read_only=True
+    )
+
+# -------------------------------------------------------------------------------
 
 
 class AirplaneSerializer(serializers.ModelSerializer):
@@ -213,11 +235,15 @@ class AirplaneListSerializer(AirplaneSerializer):
         read_only=True,
         slug_field="name"
     )
+    seats_configuration = SeatConfigurationAirplaneListSerializer(many=True)
 
 
 class AirplaneRetrieveSerializer(AirplaneSerializer):
     type = AirplaneTypeSerializer()
+    seats_configuration = SeatConfigurationAirplaneRetrieveSerializer(many=True)
 
+
+#   Serializers for SeatConfiguration model (with 'airplane' field)
 
 class SeatConfigurationSerializer(serializers.ModelSerializer):
     class Meta:
@@ -238,3 +264,5 @@ class SeatConfigurationListSerializer(SeatConfigurationSerializer):
 
 class SeatConfigurationRetrieveSerializer(SeatConfigurationListSerializer):
     airplane = AirplaneListSerializer()
+
+# --------------------------------------------------------------------

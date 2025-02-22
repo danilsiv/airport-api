@@ -243,6 +243,17 @@ class AirplaneRetrieveSerializer(AirplaneSerializer):
     seats_configuration = SeatConfigurationAirplaneRetrieveSerializer(many=True)
 
 
+class AirplaneSeatConfigurationRetrieveSerializer(serializers.ModelSerializer):
+    type = serializers.SlugRelatedField(
+        read_only=True,
+        slug_field="name"
+    )
+
+    class Meta:
+        model = Airplane
+        fields = ("id", "model_name", "type")
+
+
 #   Serializers for SeatConfiguration model (with 'airplane' field)
 
 class SeatConfigurationSerializer(serializers.ModelSerializer):
@@ -263,6 +274,6 @@ class SeatConfigurationListSerializer(SeatConfigurationSerializer):
 
 
 class SeatConfigurationRetrieveSerializer(SeatConfigurationListSerializer):
-    airplane = AirplaneListSerializer()
+    airplane = AirplaneSeatConfigurationRetrieveSerializer()
 
 # --------------------------------------------------------------------

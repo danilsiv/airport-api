@@ -150,11 +150,15 @@ class CrewGroup(models.Model):
         blank=True
     )
 
-    def __str__(self) -> str:
+    @property
+    def description(self) -> str:
         try:
             return f"Crew of flight {self.flight.flight_number}"
         except CrewGroup.flight.RelatedObjectDoesNotExist:
             return "Unassigned crew"
+
+    def __str__(self) -> str:
+        return f"Crew group number {self.id}"
 
 
 class AirplaneType(models.Model):

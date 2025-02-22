@@ -152,7 +152,7 @@ class CrewGroupViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self) -> QuerySet:
         if self.action in ("retrieve", "list"):
-            return self.queryset.select_related().prefetch_related(
+            return self.queryset.select_related("flight").prefetch_related(
                 "pilots__role",
                 "stewards__role",
                 "technicians__role",

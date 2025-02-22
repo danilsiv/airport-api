@@ -122,12 +122,13 @@ class CrewGroupSerializer(serializers.ModelSerializer):
         model = CrewGroup
         fields = (
             "id",
-            "__str__",
+            "description",
             "pilots",
             "stewards",
             "technicians",
-            "additional_staff"
+            "additional_staff",
         )
+        read_only_fields = ("id", "description")
 
 
 class CrewGroupListSerializer(CrewGroupSerializer):
@@ -154,17 +155,16 @@ class CrewGroupListSerializer(CrewGroupSerializer):
 
 
 class CrewGroupRetrieveSerializer(CrewGroupSerializer):
-    pilots = CrewMemberRetrieveSerializer(many=True)
-    stewards = CrewMemberRetrieveSerializer(many=True)
-    technicians = CrewMemberRetrieveSerializer(many=True)
-    additional_staff = CrewMemberRetrieveSerializer(many=True)
+    pilots = CrewMemberListSerializer(many=True)
+    stewards = CrewMemberListSerializer(many=True)
+    technicians = CrewMemberListSerializer(many=True)
+    additional_staff = CrewMemberListSerializer(many=True)
 
 
 class AirplaneTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = AirplaneType
         fields = ("id", "name")
-
 
 
 class AirplaneSerializer(serializers.ModelSerializer):

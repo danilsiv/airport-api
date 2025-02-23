@@ -1,5 +1,4 @@
 from rest_framework import serializers
-from rest_framework.exceptions import ValidationError
 from django.db import transaction
 
 from core.validators import validate_seat_class
@@ -49,7 +48,7 @@ class RouteSerializer(serializers.ModelSerializer):
         Route.validate_source_and_destination(
             attrs["source"],
             attrs["destination"],
-            ValidationError
+            serializers.ValidationError
         )
 
 
@@ -345,13 +344,18 @@ class FlightFilterSerializer(serializers.ModelSerializer):
     arrival_time_after = serializers.DateField(required=False)
     arrival_time_before = serializers.DateField(required=False)
 
+    source_city = serializers.CharField(required=False)
+    destination_city = serializers.CharField(required=False)
+
     class Meta:
         model = Flight
         fields = (
             "departure_time_after",
             "departure_time_before",
             "arrival_time_after",
-            "arrival_time_before"
+            "arrival_time_before",
+            "source_city",
+            "destination_city",
         )
 
     def validate(self, data):
@@ -366,5 +370,12 @@ class FlightFilterSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(
                     "arrival_time_after must be earlier than arrival_time_before."
                 )
+
+        if "source_city" in data and "destination_city" in data:
+            Route.validate_source_and_destination(
+                data["source_city"],
+                data["destination_city"],
+                serializers.ValidationError
+            )
 
         return data

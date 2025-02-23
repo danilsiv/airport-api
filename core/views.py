@@ -1,5 +1,4 @@
 from django.db.models import QuerySet
-from django.utils.dateparse import parse_date
 from rest_framework import viewsets
 from rest_framework import generics
 
@@ -37,7 +36,8 @@ from core.serializers import (
     AirplaneBaseSerializer,
     FlightSerializer,
     FlightListSerializer,
-    FlightRetrieveSerializer, FlightFilterSerializer,
+    FlightRetrieveSerializer,
+    FlightFilterSerializer,
 )
 
 
@@ -251,19 +251,28 @@ class FlightViewSet(viewsets.ModelViewSet):
 
         if "departure_time_after" in filters:
             queryset = queryset.filter(
-                departure_time__gte=parse_date(filters["departure_time_after"])
+                departure_time__gte=filters["departure_time_after"]
             )
         if "departure_time_before" in filters:
             queryset = queryset.filter(
-                departure_time__lte=parse_date(filters["departure_time_before"])
+                departure_time__lte=filters["departure_time_before"]
             )
         if "arrival_time_after" in filters:
             queryset = queryset.filter(
-                arrival_time__gte=parse_date(filters["arrival_time_after"])
+                arrival_time__gte=filters["arrival_time_after"]
             )
         if "arrival_time_before" in filters:
             queryset = queryset.filter(
-                arrival_time__lte=parse_date(filters["arrival_time_before"])
+                arrival_time__lte=filters["arrival_time_before"]
+            )
+
+        if "source_city" in filters:
+            queryset = queryset.filter(
+                route__source__city__name=filters["source_city"]
+            )
+        if "destination_city" in filters:
+            queryset = queryset.filter(
+                route__destination__city__name=filters["destination_city"]
             )
 
         if self.action == "list":

@@ -1,4 +1,5 @@
 from django.db.models import QuerySet
+from django.utils.dateparse import parse_date
 from rest_framework import viewsets
 from rest_framework import generics
 
@@ -11,7 +12,7 @@ from core.models import (
     CrewGroup,
     AirplaneType,
     Airplane,
-    SeatConfiguration,
+    SeatConfiguration, Flight,
 )
 from core.serializers import (
     CitySerializer,
@@ -34,6 +35,9 @@ from core.serializers import (
     SeatConfigurationRetrieveSerializer,
     SeatConfigurationFilterSerializer,
     AirplaneBaseSerializer,
+    FlightSerializer,
+    FlightListSerializer,
+    FlightRetrieveSerializer,
 )
 
 
@@ -220,5 +224,37 @@ class SeatConfigurationViewSet(viewsets.ModelViewSet):
 
         if self.action in ("list", "retrieve"):
             return queryset.select_related()
+
+        return queryset
+
+
+class FlightViewSet(viewsets.ModelViewSet):
+    queryset = Flight.objects.all()
+    serializer_class = FlightSerializer
+
+    def get_serializer_class(self) -> type:
+        if self.action == "list":
+            return FlightListSerializer
+        if self.action == "retrieve":
+            return FlightRetrieveSerializer
+
+        return self.serializer_class
+
+    def get_queryset(self) -> QuerySet:
+        queryset = self.queryset
+
+        if self.action == "list":
+            queryset = queryset.select_related(
+                "route__destination__city",
+                "route__source__city",
+                "airplane"
+            )
+        if self.action == "retrieve":
+            queryset = queryset.select_related(
+                "route__destination__city",
+                "route__source__city",
+                "airplane__type",
+                "crew"
+            )
 
         return queryset

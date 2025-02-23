@@ -331,3 +331,9 @@ class FlightListSerializer(FlightSerializer):
         read_only=True,
         source="get_status_display"
     )
+
+
+class FlightRetrieveSerializer(FlightListSerializer):
+    route = RouteListSerializer()
+    airplane = AirplaneSeatConfigurationRetrieveSerializer()
+    crew = CrewGroupListSerializer()

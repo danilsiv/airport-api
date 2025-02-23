@@ -86,6 +86,10 @@ class RouteViewSet(viewsets.ModelViewSet):
     def get_queryset(self) -> QuerySet:
         queryset = self.queryset
 
+        route_code = self.request.query_params.get("route_code")
+        if route_code:
+            queryset = queryset.filter(route_code=route_code)
+
         source_name = self.request.query_params.get("source_name")
         if source_name:
             queryset = queryset.filter(source__name=source_name)

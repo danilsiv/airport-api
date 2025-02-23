@@ -13,6 +13,7 @@ from core.models import (
     AirplaneType,
     Airplane,
     SeatConfiguration,
+    Flight,
 )
 
 
@@ -298,3 +299,18 @@ class SeatConfigurationFilterSerializer(serializers.ModelSerializer):
         fields = ("seats_class", "airplane")
 
 # --------------------------------------------------------------------
+
+
+class FlightSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Flight
+        fields = (
+            "id",
+            "flight_number",
+            "route",
+            "airplane",
+            "departure_time",
+            "arrival_time",
+            "status",
+            "crew"
+        )

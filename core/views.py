@@ -2,8 +2,6 @@ from django.db.models import QuerySet
 from rest_framework import viewsets
 from rest_framework import generics
 
-
-from core.validators import validate_seat_class
 from core.models import (
     City,
     Airport,
@@ -31,13 +29,11 @@ from core.serializers import (
     CrewGroupListSerializer,
     CrewGroupRetrieveSerializer,
     AirplaneTypeSerializer,
-    AirplaneSerializer,
-    AirplaneListSerializer,
-    AirplaneRetrieveSerializer,
     SeatConfigurationSerializer,
     SeatConfigurationListSerializer,
     SeatConfigurationRetrieveSerializer,
     SeatConfigurationFilterSerializer,
+    AirplaneBaseSerializer,
 )
 
 
@@ -170,15 +166,7 @@ class AirplaneTypeListView(generics.ListCreateAPIView):
 
 class AirplaneViewSet(viewsets.ModelViewSet):
     queryset = Airplane.objects.all()
-    serializer_class = AirplaneSerializer
-
-    def get_serializer_class(self) -> type:
-        if self.action == "list":
-            return AirplaneListSerializer
-        if self.action == "retrieve":
-            return AirplaneRetrieveSerializer
-
-        return self.serializer_class
+    serializer_class = AirplaneBaseSerializer
 
     def get_queryset(self) -> QuerySet:
         queryset = self.queryset
@@ -195,6 +183,12 @@ class AirplaneViewSet(viewsets.ModelViewSet):
             return queryset.select_related().prefetch_related("seats_configuration")
 
         return queryset
+
+    def get_serializer_context(self) -> dict:
+        context = super().get_serializer_context()
+        context["is_list_view"] = self.action == "list"
+        context["is_detail_view"] = self.action == "retrieve"
+        return context
 
 
 class SeatConfigurationViewSet(viewsets.ModelViewSet):

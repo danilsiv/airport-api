@@ -197,8 +197,9 @@ class SeatConfigurationAirplaneRetrieveSerializer(SeatConfigurationAirplaneSeria
 # -------------------------------------------------------------------------------
 
 
-class AirplaneSerializer(serializers.ModelSerializer):
+class AirplaneBaseSerializer(serializers.ModelSerializer):
     seats_configuration = SeatConfigurationAirplaneSerializer(many=True)
+
     class Meta:
         model = Airplane
         fields = ("id", "model_name", "type", "seats_configuration")
@@ -222,26 +223,33 @@ class AirplaneSerializer(serializers.ModelSerializer):
 
             configurations_data = validated_data.pop("seats_configuration", [])
 
-            instance.seats_configuration.all().delete()
-            SeatConfiguration.objects.bulk_create([
-                SeatConfiguration(airplane=instance, **conf)
-                for conf in configurations_data
-            ])
+            if configurations_data is not None:
+                instance.seats_configuration.all().delete()
+                SeatConfiguration.objects.bulk_create([
+                    SeatConfiguration(airplane=instance, **conf)
+                    for conf in configurations_data
+                ])
 
             return instance
 
+    def to_representation(self, instance) -> dict:
+        data = super().to_representation(instance)
 
-class AirplaneListSerializer(AirplaneSerializer):
-    type = serializers.SlugRelatedField(
-        read_only=True,
-        slug_field="name"
-    )
-    seats_configuration = SeatConfigurationAirplaneListSerializer(many=True)
+        if self.context.get("is_list_view"):
+            data["seats_configuration"] = SeatConfigurationAirplaneListSerializer(
+                instance.seats_configuration.all(),
+                many=True
+            ).data
+            data["type"] = instance.type.name
 
+        if self.context.get("is_detail_view"):
+            data["seats_configuration"] = SeatConfigurationAirplaneRetrieveSerializer(
+                instance.seats_configuration.all(),
+                many=True
+            ).data
+            data["type"] = AirplaneTypeSerializer(instance.type).data
 
-class AirplaneRetrieveSerializer(AirplaneSerializer):
-    type = AirplaneTypeSerializer()
-    seats_configuration = SeatConfigurationAirplaneRetrieveSerializer(many=True)
+        return data
 
 
 class AirplaneSeatConfigurationRetrieveSerializer(serializers.ModelSerializer):

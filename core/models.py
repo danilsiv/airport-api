@@ -94,6 +94,10 @@ class Route(models.Model):
         self.full_clean()
         return super(Route, self).save(force_insert, force_update, using, update_fields)
 
+    @property
+    def name(self) -> str:
+        return f"{self.source.city.name} - {self.destination.city.name}"
+
     def __str__(self) -> str:
         return f"{self.source.name} - {self.destination.name}"
 

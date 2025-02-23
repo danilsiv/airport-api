@@ -52,12 +52,16 @@ class RouteSerializer(serializers.ModelSerializer):
         )
 
 
-class RouteListSerializer(RouteSerializer):
+class RouteListSerializer(serializers.ModelSerializer):
     source = AirportListSerializer()
     destination = AirportListSerializer()
 
+    class Meta:
+        model = Route
+        fields = ("id", "route_code", "source", "destination", "distance")
 
-class RouteRetrieveSerializer(RouteSerializer):
+
+class RouteRetrieveSerializer(RouteListSerializer):
     source = AirportRetrieveSerializer()
     destination = AirportRetrieveSerializer()
 

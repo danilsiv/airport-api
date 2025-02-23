@@ -43,6 +43,7 @@ class Airport(models.Model):
 
 
 class Route(models.Model):
+    route_code = models.CharField(max_length=7, unique=True, editable=False)
     source = models.ForeignKey(
         Airport,
         on_delete=models.CASCADE,
@@ -92,14 +93,18 @@ class Route(models.Model):
         update_fields=None,
     ):
         self.full_clean()
-        return super(Route, self).save(force_insert, force_update, using, update_fields)
+        if not self.route_code:
+            self.route_code = f"{self.source.iata_code}-{self.destination.iata_code}"
+        return super(Route, self).save(
+            force_insert, force_update, using, update_fields
+        )
 
     @property
     def name(self) -> str:
         return f"{self.source.city.name} - {self.destination.city.name}"
 
     def __str__(self) -> str:
-        return f"{self.source.name} - {self.destination.name}"
+        return self.route_code
 
 
 class Role(models.Model):

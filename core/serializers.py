@@ -171,28 +171,29 @@ class AirplaneTypeSerializer(serializers.ModelSerializer):
 
 # SeatConfiguration serializers for Airplane model (without 'airplane' field)
 
+class SeatClassDisplayMixin(serializers.ModelSerializer):
+    seats_class = serializers.CharField(
+        source="get_seats_class_display",
+        read_only=True
+    )
+
 class SeatConfigurationAirplaneSerializer(serializers.ModelSerializer):
     class Meta:
         model = SeatConfiguration
         fields = ("id", "seats_class", "rows", "seats_in_row")
 
 
-class SeatConfigurationAirplaneListSerializer(serializers.ModelSerializer):
-    seats_class = serializers.CharField(
-        source="get_seats_class_display",
-        read_only=True
-    )
-
+class SeatConfigurationAirplaneListSerializer(SeatClassDisplayMixin):
     class Meta:
         model = SeatConfiguration
         fields = ("seats_class", "num_of_seats")
 
 
-class SeatConfigurationAirplaneRetrieveSerializer(SeatConfigurationAirplaneSerializer):
-    seats_class = serializers.CharField(
-        source="get_seats_class_display",
-        read_only=True
-    )
+class SeatConfigurationAirplaneRetrieveSerializer(
+    SeatConfigurationAirplaneSerializer,
+    SeatClassDisplayMixin
+):
+    pass
 
 # -------------------------------------------------------------------------------
 
@@ -271,11 +272,10 @@ class SeatConfigurationSerializer(serializers.ModelSerializer):
         fields = ("id", "seats_class", "rows", "seats_in_row", "airplane")
 
 
-class SeatConfigurationListSerializer(SeatConfigurationSerializer):
-    seats_class = serializers.CharField(
-        source="get_seats_class_display",
-        read_only=True
-    )
+class SeatConfigurationListSerializer(
+    SeatConfigurationSerializer,
+    SeatClassDisplayMixin
+):
     airplane = serializers.SlugRelatedField(
         read_only=True,
         slug_field="model_name"

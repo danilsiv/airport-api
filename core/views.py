@@ -37,7 +37,7 @@ from core.serializers import (
     AirplaneBaseSerializer,
     FlightSerializer,
     FlightListSerializer,
-    FlightRetrieveSerializer,
+    FlightRetrieveSerializer, FlightFilterSerializer,
 )
 
 
@@ -243,30 +243,27 @@ class FlightViewSet(viewsets.ModelViewSet):
     def get_queryset(self) -> QuerySet:
         queryset = self.queryset
 
-        departure_after = self.request.query_params.get("departure_time_after")
-        departure_before = self.request.query_params.get("departure_time_before")
-        arrival_after = self.request.query_params.get("arrival_time_after")
-        arrival_before = self.request.query_params.get("arrival_time_before")
+        filter_serializer = FlightFilterSerializer(
+            data=self.request.query_params
+        )
+        filter_serializer.is_valid(raise_exception=True)
+        filters = filter_serializer.validated_data
 
-        if departure_after:
-            # TODO: validation
+        if "departure_time_after" in filters:
             queryset = queryset.filter(
-                departure_time__gte=parse_date(departure_after)
+                departure_time__gte=parse_date(filters["departure_time_after"])
             )
-        if departure_before:
-            # TODO: validation
+        if "departure_time_before" in filters:
             queryset = queryset.filter(
-                departure_time__lte=parse_date(departure_before)
+                departure_time__lte=parse_date(filters["departure_time_before"])
             )
-        if arrival_after:
-            # TODO: validation
+        if "arrival_time_after" in filters:
             queryset = queryset.filter(
-                arrival_time__gte=parse_date(arrival_after)
+                arrival_time__gte=parse_date(filters["arrival_time_after"])
             )
-        if arrival_before:
-            # TODO: validation
+        if "arrival_time_before" in filters:
             queryset = queryset.filter(
-                arrival_time__lte=parse_date(arrival_before)
+                arrival_time__lte=parse_date(filters["arrival_time_before"])
             )
 
         if self.action == "list":

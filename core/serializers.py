@@ -337,3 +337,34 @@ class FlightRetrieveSerializer(FlightListSerializer):
     route = RouteListSerializer()
     airplane = AirplaneSeatConfigurationRetrieveSerializer()
     crew = CrewGroupListSerializer()
+
+
+class FlightFilterSerializer(serializers.ModelSerializer):
+    departure_time_after = serializers.DateField(required=False)
+    departure_time_before = serializers.DateField(required=False)
+    arrival_time_after = serializers.DateField(required=False)
+    arrival_time_before = serializers.DateField(required=False)
+
+    class Meta:
+        model = Flight
+        fields = (
+            "departure_time_after",
+            "departure_time_before",
+            "arrival_time_after",
+            "arrival_time_before"
+        )
+
+    def validate(self, data):
+        if "departure_time_after" in data and "departure_time_before" in data:
+            if data["departure_time_after"] > data["departure_time_before"]:
+                raise serializers.ValidationError(
+                    "departure_time_after must be earlier than departure_time_before."
+                )
+
+        if "arrival_time_after" in data and "arrival_time_before" in data:
+            if data["arrival_time_after"] > data["arrival_time_before"]:
+                raise serializers.ValidationError(
+                    "arrival_time_after must be earlier than arrival_time_before."
+                )
+
+        return data

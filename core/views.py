@@ -243,6 +243,32 @@ class FlightViewSet(viewsets.ModelViewSet):
     def get_queryset(self) -> QuerySet:
         queryset = self.queryset
 
+        departure_after = self.request.query_params.get("departure_time_after")
+        departure_before = self.request.query_params.get("departure_time_before")
+        arrival_after = self.request.query_params.get("arrival_time_after")
+        arrival_before = self.request.query_params.get("arrival_time_before")
+
+        if departure_after:
+            # TODO: validation
+            queryset = queryset.filter(
+                departure_time__gte=parse_date(departure_after)
+            )
+        if departure_before:
+            # TODO: validation
+            queryset = queryset.filter(
+                departure_time__lte=parse_date(departure_before)
+            )
+        if arrival_after:
+            # TODO: validation
+            queryset = queryset.filter(
+                arrival_time__gte=parse_date(arrival_after)
+            )
+        if arrival_before:
+            # TODO: validation
+            queryset = queryset.filter(
+                arrival_time__lte=parse_date(arrival_before)
+            )
+
         if self.action == "list":
             queryset = queryset.select_related(
                 "route__destination__city",

@@ -138,6 +138,7 @@ class CrewMember(models.Model):
 
 
 class CrewGroup(models.Model):
+    crew_code = models.CharField(max_length=5, unique=True)
     pilots = models.ManyToManyField(
         CrewMember,
         related_name="pilot_crew_groups",
@@ -167,7 +168,7 @@ class CrewGroup(models.Model):
             return "Unassigned crew"
 
     def __str__(self) -> str:
-        return f"Crew group number {self.id}"
+        return f"Crew {self.crew_code}"
 
 
 class AirplaneType(models.Model):

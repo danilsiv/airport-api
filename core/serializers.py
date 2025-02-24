@@ -128,6 +128,7 @@ class CrewGroupSerializer(serializers.ModelSerializer):
         model = CrewGroup
         fields = (
             "id",
+            "crew_code",
             "description",
             "pilots",
             "stewards",
@@ -320,6 +321,10 @@ class FlightSerializer(serializers.ModelSerializer):
 
 
 class FlightListSerializer(FlightSerializer):
+    crew = serializers.SlugRelatedField(
+        read_only=True,
+        slug_field="crew_code"
+    )
     route = serializers.SlugRelatedField(
         read_only=True,
         slug_field="name"

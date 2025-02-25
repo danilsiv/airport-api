@@ -13,6 +13,8 @@ from core.models import (
     Airplane,
     SeatConfiguration,
     Flight,
+    Ticket,
+    Order,
 )
 
 
@@ -388,3 +390,33 @@ class FlightFilterSerializer(serializers.ModelSerializer):
             )
 
         return data
+
+
+class TicketSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Ticket
+        fields = (
+            "id",
+            "row",
+            "seat",
+            "passenger_first_name",
+            "passenger_last_name",
+            "seat_class",
+            "flight"
+        )
+
+
+class OrderSerializer(serializers.ModelSerializer):
+    tickets = TicketSerializer(many=True, allow_empty=False)
+
+    class Meta:
+        model = Order
+        fields = ("id","created_at", "tickets")
+
+    def create(self, validated_data) -> Order:
+        with transaction.atomic():
+            tickets_data = validated_data.pop("tickets", None)
+            order = Order.objects.create(**validated_data)
+            for ticket in tickets_data:
+                Ticket.objects.create(order=order, **ticket)
+            return order

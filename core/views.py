@@ -1,6 +1,8 @@
 from django.db.models import QuerySet
 from rest_framework import viewsets
 from rest_framework import generics
+from rest_framework import mixins
+from django.db import connection
 
 from core.models import (
     City,
@@ -11,7 +13,7 @@ from core.models import (
     CrewGroup,
     AirplaneType,
     Airplane,
-    SeatConfiguration, Flight,
+    SeatConfiguration, Flight, Order,
 )
 from core.serializers import (
     CitySerializer,
@@ -37,7 +39,7 @@ from core.serializers import (
     FlightSerializer,
     FlightListSerializer,
     FlightRetrieveSerializer,
-    FlightFilterSerializer,
+    FlightFilterSerializer, OrderSerializer, OrderListSerializer, OrderRetrieveSerializer,
 )
 
 
@@ -291,6 +293,38 @@ class FlightViewSet(viewsets.ModelViewSet):
                 "route__source__city",
                 "airplane__type",
                 "crew"
+            )
+
+        return queryset
+
+
+class OrderListCreateRetrieveView(
+    viewsets.GenericViewSet,
+    mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin
+):
+    queryset = Order.objects.all()
+    serializer_class = OrderSerializer
+
+    def perform_create(self, serializer) -> None:
+        serializer.save(user=self.request.user)
+
+    def get_serializer_class(self) -> type:
+        if self.action == "list":
+            return OrderListSerializer
+        if self.action == "retrieve":
+            return OrderRetrieveSerializer
+
+        return self.serializer_class
+
+    def get_queryset(self) -> QuerySet:
+        queryset = self.queryset.filter(user=self.request.user)
+
+        if self.action in ("list", "retrieve"):
+            queryset = queryset.prefetch_related(
+                "tickets__flight__route__source__city",
+                "tickets__flight__route__destination__city"
             )
 
         return queryset

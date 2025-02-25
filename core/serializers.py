@@ -12,9 +12,7 @@ from core.models import (
     AirplaneType,
     Airplane,
     SeatConfiguration,
-    Flight,
-    Ticket,
-    Order,
+    Flight, Ticket, Order, SEATS_CLASS_CHOICES,
 )
 
 
@@ -420,3 +418,32 @@ class OrderSerializer(serializers.ModelSerializer):
             for ticket in tickets_data:
                 Ticket.objects.create(order=order, **ticket)
             return order
+
+
+class TicketListSerializer(TicketSerializer):
+    seat_class_ = serializers.SerializerMethodField()
+    trip = serializers.CharField(
+        source="flight.route.name",
+        read_only=True
+    )
+    passenger = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Ticket
+        fields = (
+            "id",
+            "passenger",
+            "seat_class_",
+            "trip"
+        )
+
+    def get_seat_class_(self, obj):
+        return obj.get_seat_class_display()
+
+    def get_passenger(self, obj):
+        return f"{obj.passenger_first_name} {obj.passenger_last_name}"
+
+
+class OrderListSerializer(OrderSerializer):
+    created_at = serializers.DateTimeField(format="%d %b %Y, %H:%M")
+    tickets = TicketListSerializer(many=True, read_only=True)

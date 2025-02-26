@@ -343,25 +343,48 @@ class Ticket(models.Model):
         )
         ordering = ("seat",)
 
-    def clean(self) -> None:
-        if not self.flight.airplane:
+    @staticmethod
+    def validate_airplane_exists(airplane: Airplane) -> None:
+        if not airplane:
             raise ValidationError("No airplane has been assigned to  this flight yet.")
 
-        seat_configuration = self.flight.airplane.seats_configuration.filter(
-            seats_class=self.seat_class
+    @staticmethod
+    def get_seat_configuration(flight: Flight, seat_class: str) -> SeatConfiguration:
+        seat_configuration = flight.airplane.seats_configuration.filter(
+            seats_class=seat_class
         ).first()
 
         if not seat_configuration:
-            raise ValidationError(f"Seat configuration for {self.seat_class} not found.")
+            raise ValidationError(f"Seat configuration for {seat_class} not found.")
+
+        return seat_configuration
+
+    @staticmethod
+    def validate_max_rows_max_seats(
+            flight: Flight,
+            seat_class: str,
+            row: int,
+            seat: int
+    ) -> None:
+        seat_configuration = Ticket.get_seat_configuration(flight, seat_class)
 
         max_seats = seat_configuration.num_of_seats
         max_rows = seat_configuration.rows
 
-        if not (1 <= self.seat <= max_seats):
+        if not (1 <= row <= max_rows):
+            raise ValidationError(f"Row must be in range [1, {max_rows}].")
+
+        if not (1 <= seat <= max_seats):
             raise ValidationError(f"Seat must be in range [1, {max_seats}].")
 
-        if not (1 <= self.row <= max_rows):
-            raise ValidationError(f"Row must be in range [1, {max_rows}].")
+    def clean(self) -> None:
+        Ticket.validate_airplane_exists(self.flight.airplane)
+        Ticket.validate_max_rows_max_seats(
+            self.flight,
+            self.seat_class,
+            self.row,
+            self.seat
+        )
 
     def save(
         self,

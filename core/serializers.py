@@ -12,7 +12,9 @@ from core.models import (
     AirplaneType,
     Airplane,
     SeatConfiguration,
-    Flight, Ticket, Order, SEATS_CLASS_CHOICES,
+    Flight,
+    Ticket,
+    Order,
 )
 
 
@@ -401,6 +403,15 @@ class TicketSerializer(serializers.ModelSerializer):
             "passenger_last_name",
             "seat_class",
             "flight"
+        )
+
+    def validate(self, attrs) -> None:
+        Ticket.validate_airplane_exists(attrs["flight"].airplane)
+        Ticket.validate_max_rows_max_seats(
+            attrs["flight"],
+            attrs["seat_class"],
+            attrs["row"],
+            attrs["seat"]
         )
 
 

@@ -13,7 +13,9 @@ from core.models import (
     CrewGroup,
     AirplaneType,
     Airplane,
-    SeatConfiguration, Flight, Order,
+    SeatConfiguration,
+    Flight,
+    Order,
 )
 from core.serializers import (
     CitySerializer,
@@ -39,7 +41,10 @@ from core.serializers import (
     FlightSerializer,
     FlightListSerializer,
     FlightRetrieveSerializer,
-    FlightFilterSerializer, OrderSerializer, OrderListSerializer, OrderRetrieveSerializer,
+    FlightFilterSerializer,
+    OrderSerializer,
+    OrderListSerializer,
+    OrderRetrieveSerializer,
 )
 
 

@@ -392,6 +392,13 @@ class FlightFilterSerializer(serializers.ModelSerializer):
         return data
 
 
+class SeatClassMixin(serializers.ModelSerializer):
+    seat_class_ = serializers.SerializerMethodField()
+
+    def get_seat_class_(self, obj) -> str:
+        return obj.get_seat_class_display()
+
+
 class TicketSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ticket
@@ -413,6 +420,7 @@ class TicketSerializer(serializers.ModelSerializer):
             attrs["row"],
             attrs["seat"]
         )
+        return attrs
 
 
 class OrderSerializer(serializers.ModelSerializer):
@@ -431,8 +439,7 @@ class OrderSerializer(serializers.ModelSerializer):
             return order
 
 
-class TicketListSerializer(TicketSerializer):
-    seat_class_ = serializers.SerializerMethodField()
+class TicketListSerializer(TicketSerializer, SeatClassMixin):
     trip = serializers.CharField(
         source="flight.route.name",
         read_only=True
@@ -448,15 +455,11 @@ class TicketListSerializer(TicketSerializer):
             "trip"
         )
 
-    def get_seat_class_(self, obj):
-        return obj.get_seat_class_display()
-
-    def get_passenger(self, obj):
+    def get_passenger(self, obj) -> str:
         return f"{obj.passenger_first_name} {obj.passenger_last_name}"
 
 
-class TicketRetrieveSerializer(TicketSerializer):
-    seat_class_ = serializers.SerializerMethodField()
+class TicketRetrieveSerializer(TicketSerializer, SeatClassMixin):
     flight = serializers.SlugRelatedField(
         read_only=True,
         slug_field="flight_number"
@@ -477,9 +480,6 @@ class TicketRetrieveSerializer(TicketSerializer):
         format="%d %b %Y, %H:%M",
         source="flight.arrival_time"
     )
-
-    def get_seat_class_(self, obj):
-        return obj.get_seat_class_display()
 
     class Meta:
         model = Ticket

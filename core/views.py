@@ -45,11 +45,13 @@ from core.serializers import (
     OrderListSerializer,
     OrderRetrieveSerializer,
 )
+from core.pagination import CityRolePagination
 
 
 class CityViewSet(viewsets.ModelViewSet):
     queryset = City.objects.all()
     serializer_class = CitySerializer
+    pagination_class = CityRolePagination
 
 
 class AirportViewSet(viewsets.ModelViewSet):
@@ -123,6 +125,7 @@ class RouteViewSet(viewsets.ModelViewSet):
 class RoleListView(generics.ListCreateAPIView):
     queryset = Role.objects.all()
     serializer_class = RoleSerializer
+    pagination_class = CityRolePagination
 
 
 class CrewMemberViewSet(viewsets.ModelViewSet):

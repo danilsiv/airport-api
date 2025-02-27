@@ -55,15 +55,37 @@ class RouteSerializer(serializers.ModelSerializer):
 
 
 class RouteListSerializer(serializers.ModelSerializer):
-    source = AirportListSerializer()
-    destination = AirportListSerializer()
+    source_iata = serializers.SerializerMethodField()
+    source_city = serializers.SerializerMethodField()
+    destination_iata = serializers.SerializerMethodField()
+    destination_city = serializers.SerializerMethodField()
+
+    def get_source_iata(self, obj):
+        return obj.source.iata_code
+
+    def get_source_city(self, obj):
+        return obj.source.city.name
+
+    def get_destination_iata(self, obj):
+        return obj.destination.iata_code
+
+    def get_destination_city(self, obj):
+        return obj.destination.city.name
 
     class Meta:
         model = Route
-        fields = ("id", "route_code", "source", "destination", "distance")
+        fields = (
+            "id",
+            "route_code",
+            "source_iata",
+            "source_city",
+            "destination_iata",
+            "destination_city",
+            "distance"
+        )
 
 
-class RouteRetrieveSerializer(RouteListSerializer):
+class RouteRetrieveSerializer(RouteSerializer):
     source = AirportRetrieveSerializer()
     destination = AirportRetrieveSerializer()
 
@@ -453,8 +475,10 @@ class OrderSerializer(serializers.ModelSerializer):
         with transaction.atomic():
             tickets_data = validated_data.pop("tickets", None)
             order = Order.objects.create(**validated_data)
-            for ticket in tickets_data:
-                Ticket.objects.create(order=order, **ticket)
+            Ticket.objects.bulk_create([
+                Ticket(order=order, **ticket)
+                for ticket in tickets_data
+            ])
             return order
 
 

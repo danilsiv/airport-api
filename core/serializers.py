@@ -341,6 +341,25 @@ class FlightListSerializer(FlightSerializer):
         read_only=True,
         source="get_status_display"
     )
+    ec_available = serializers.IntegerField(read_only=True)
+    bc_available = serializers.IntegerField(read_only=True)
+    fc_available = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        model = Flight
+        fields = (
+            "id",
+            "flight_number",
+            "ec_available",
+            "bc_available",
+            "fc_available",
+            "route",
+            "airplane",
+            "departure_time",
+            "arrival_time",
+            "status",
+            "crew"
+        )
 
 
 class FlightRetrieveSerializer(FlightListSerializer):

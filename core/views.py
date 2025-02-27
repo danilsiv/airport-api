@@ -1,8 +1,7 @@
-from django.db.models import QuerySet
+from django.db.models import QuerySet, F, Count, Q, Case, When, Value, IntegerField, Sum
 from rest_framework import viewsets
 from rest_framework import generics
 from rest_framework import mixins
-from django.db import connection
 
 from core.models import (
     City,
@@ -286,18 +285,46 @@ class FlightViewSet(viewsets.ModelViewSet):
                 route__destination__city__name=filters["destination_city"]
             )
 
-        if self.action == "list":
-            queryset = queryset.select_related(
-                "route__destination__city",
-                "route__source__city",
-                "airplane"
-            )
-        if self.action == "retrieve":
+        if self.action in ("list", "retrieve"):
             queryset = queryset.select_related(
                 "route__destination__city",
                 "route__source__city",
                 "airplane__type",
                 "crew"
+            ).annotate(
+                ec_total=Sum(
+                    Case(
+                    When(airplane__seats_configuration__seats_class="EC",
+                         then=F("airplane__seats_configuration__seats_in_row")
+                              * F("airplane__seats_configuration__rows")
+                         ),
+                    default=Value(0),
+                    output_field=IntegerField()
+                )),
+                bc_total=Sum(
+                    Case(
+                    When(airplane__seats_configuration__seats_class="BC",
+                         then=F("airplane__seats_configuration__seats_in_row")
+                              * F("airplane__seats_configuration__rows")
+                         ),
+                    default=Value(0),
+                    output_field=IntegerField()
+                )),
+                fc_total=Sum(
+                    Case(
+                    When(airplane__seats_configuration__seats_class="FC",
+                         then=F("airplane__seats_configuration__seats_in_row")
+                              * F("airplane__seats_configuration__rows")
+                         ),
+                    default=Value(0),
+                    output_field=IntegerField()
+                )),
+                ec_booked=Count("tickets", filter=Q(tickets__seat_class="EC")),
+                bc_booked=Count("tickets", filter=Q(tickets__seat_class="BC")),
+                fc_booked=Count("tickets", filter=Q(tickets__seat_class="FC")),
+                ec_available=F("ec_total") - F("ec_booked"),
+                bc_available=F("bc_total") - F("bc_booked"),
+                fc_available=F("fc_total") - F("fc_booked")
             )
 
         return queryset

@@ -45,7 +45,7 @@ from core.serializers import (
     OrderListSerializer,
     OrderRetrieveSerializer,
 )
-from core.pagination import CityRolePagination
+from core.pagination import CityRolePagination, FlightOrderPagination
 
 
 class CityViewSet(viewsets.ModelViewSet):
@@ -244,6 +244,7 @@ class SeatConfigurationViewSet(viewsets.ModelViewSet):
 class FlightViewSet(viewsets.ModelViewSet):
     queryset = Flight.objects.all()
     serializer_class = FlightSerializer
+    pagination_class = FlightOrderPagination
 
     def get_serializer_class(self) -> type:
         if self.action == "list":
@@ -341,6 +342,7 @@ class OrderListCreateRetrieveView(
 ):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
+    pagination_class = FlightOrderPagination
 
     def perform_create(self, serializer) -> None:
         serializer.save(user=self.request.user)

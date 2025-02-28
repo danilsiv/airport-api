@@ -2,6 +2,7 @@ from django.db.models import QuerySet, F, Count, Q, Case, When, Value, IntegerFi
 from rest_framework import viewsets
 from rest_framework import generics
 from rest_framework import mixins
+from rest_framework.permissions import IsAuthenticated
 
 from core.models import (
     City,
@@ -46,17 +47,20 @@ from core.serializers import (
     OrderRetrieveSerializer,
 )
 from core.pagination import CityRolePagination, FlightOrderPagination
+from core.permissions import IsAdminUserOrReadOnly
 
 
 class CityViewSet(viewsets.ModelViewSet):
     queryset = City.objects.all()
     serializer_class = CitySerializer
     pagination_class = CityRolePagination
+    permission_classes = (IsAdminUserOrReadOnly,)
 
 
 class AirportViewSet(viewsets.ModelViewSet):
     queryset = Airport.objects.all()
     serializer_class = AirportSerializer
+    permission_classes = (IsAdminUserOrReadOnly,)
 
     def get_serializer_class(self) -> type:
         if self.action == "list":
@@ -82,6 +86,7 @@ class AirportViewSet(viewsets.ModelViewSet):
 class RouteViewSet(viewsets.ModelViewSet):
     queryset = Route.objects.all()
     serializer_class = RouteSerializer
+    permission_classes = (IsAdminUserOrReadOnly,)
 
     def get_serializer_class(self) -> type:
         if self.action == "list":
@@ -184,6 +189,7 @@ class AirplaneTypeListView(generics.ListCreateAPIView):
 class AirplaneViewSet(viewsets.ModelViewSet):
     queryset = Airplane.objects.all()
     serializer_class = AirplaneBaseSerializer
+    permission_classes = (IsAdminUserOrReadOnly,)
 
     def get_queryset(self) -> QuerySet:
         queryset = self.queryset
@@ -245,6 +251,7 @@ class FlightViewSet(viewsets.ModelViewSet):
     queryset = Flight.objects.all()
     serializer_class = FlightSerializer
     pagination_class = FlightOrderPagination
+    permission_classes = (IsAdminUserOrReadOnly,)
 
     def get_serializer_class(self) -> type:
         if self.action == "list":
@@ -343,6 +350,7 @@ class OrderListCreateRetrieveView(
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
     pagination_class = FlightOrderPagination
+    permission_classes = (IsAuthenticated,)
 
     def perform_create(self, serializer) -> None:
         serializer.save(user=self.request.user)

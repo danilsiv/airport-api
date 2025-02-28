@@ -1,8 +1,12 @@
+import uuid
+import pathlib
+
 from django.conf import settings
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import UniqueConstraint
 from django.core.exceptions import ValidationError
+from django.utils.text import slugify
 
 from core.validators import validate_iata_code_format, validate_flight_number_format
 
@@ -117,9 +121,21 @@ class Role(models.Model):
         return self.name
 
 
+def crew_member_image_path(instance: "CrewMember", filename: str) -> pathlib.Path:
+    filename_suffix = pathlib.Path(filename).suffix
+    unique_id = uuid.uuid4()
+    slug_name = slugify(f"{instance.first_name[0]}{instance.last_name}")
+    new_filename = f"{slug_name}-{unique_id}{filename_suffix}"
+    return pathlib.Path("upload/members_photo/") / new_filename
+
+
 class CrewMember(models.Model):
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
+    photo = models.ImageField(
+        null=True,
+        upload_to=crew_member_image_path
+    )
     role = models.ForeignKey(
         Role,
         on_delete=models.CASCADE,

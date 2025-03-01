@@ -112,6 +112,15 @@ class CrewMemberListSerializer(CrewMemberSerializer):
 class CrewMemberRetrieveSerializer(CrewMemberSerializer):
     role = RoleSerializer()
 
+    class Meta(CrewMemberSerializer.Meta):
+        fields = CrewMemberSerializer.Meta.fields + ("photo",)
+
+
+class CrewMemberPhotoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CrewMember
+        fields = ("id", "photo")
+
 
 class CrewGroupSerializer(serializers.ModelSerializer):
     pilots = serializers.PrimaryKeyRelatedField(
@@ -186,7 +195,7 @@ class CrewGroupListSerializer(CrewGroupSerializer):
 
 
 class CrewGroupRetrieveSerializer(CrewGroupSerializer):
-    pilots = CrewMemberListSerializer(many=True)
+    pilots = CrewMemberSerializer(many=True)
     stewards = CrewMemberListSerializer(many=True)
     technicians = CrewMemberListSerializer(many=True)
     additional_staff = CrewMemberListSerializer(many=True)

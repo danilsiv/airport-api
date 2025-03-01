@@ -1,8 +1,10 @@
 from django.db.models import QuerySet, F, Count, Q, Case, When, Value, IntegerField, Sum
-from rest_framework import viewsets
+from rest_framework import viewsets, status
 from rest_framework import generics
 from rest_framework import mixins
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
 from core.models import (
     City,
@@ -45,6 +47,7 @@ from core.serializers import (
     OrderSerializer,
     OrderListSerializer,
     OrderRetrieveSerializer,
+    CrewMemberPhotoSerializer,
 )
 from core.pagination import CityRolePagination, FlightOrderPagination
 from core.permissions import IsAdminUserOrReadOnly
@@ -142,6 +145,8 @@ class CrewMemberViewSet(viewsets.ModelViewSet):
             return CrewMemberListSerializer
         if self.action == "retrieve":
             return CrewMemberRetrieveSerializer
+        if self.action == "upload_photo":
+            return CrewMemberPhotoSerializer
 
         return self.serializer_class
 
@@ -156,6 +161,19 @@ class CrewMemberViewSet(viewsets.ModelViewSet):
             queryset = queryset.select_related("role")
 
         return queryset
+
+    @action(
+        methods=["POST"],
+        detail=True,
+        url_path="upload-photo"
+    )
+    def upload_photo(self, request, pk=None):
+        crew_member = self.get_object()
+        serializer = self.get_serializer(crew_member, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class CrewGroupViewSet(viewsets.ModelViewSet):

@@ -5,7 +5,8 @@ from rest_framework import mixins
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from drf_spectacular.utils import extend_schema, extend_schema_view
+from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter
+from drf_spectacular.types import OpenApiTypes
 
 from core.models import (
     City,
@@ -55,12 +56,12 @@ from core.permissions import IsAdminUserOrReadOnly
 
 
 @extend_schema_view(
-    create=extend_schema(summary="Create a new city"),
-    list=extend_schema(summary="Get a list of cities"),
-    retrieve=extend_schema(summary="Get details of a city"),
+    create=extend_schema(summary="Create city"),
+    list=extend_schema(summary="List cities"),
+    retrieve=extend_schema(summary="Get city details"),
     update=extend_schema(summary="Update city"),
     partial_update=extend_schema(summary="Partially update city"),
-    destroy=extend_schema(summary="Delete a city"),
+    destroy=extend_schema(summary="Delete city"),
 )
 class CityViewSet(viewsets.ModelViewSet):
     queryset = City.objects.all()
@@ -69,6 +70,13 @@ class CityViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAdminUserOrReadOnly,)
 
 
+@extend_schema_view(
+    create=extend_schema(summary="Create airport"),
+    retrieve=extend_schema(summary="Get airport details"),
+    update=extend_schema(summary="Update airport"),
+    partial_update=extend_schema(summary="Partially update airport"),
+    destroy=extend_schema(summary="Delete airport"),
+)
 class AirportViewSet(viewsets.ModelViewSet):
     queryset = Airport.objects.all()
     serializer_class = AirportSerializer
@@ -87,12 +95,27 @@ class AirportViewSet(viewsets.ModelViewSet):
 
         country = self.request.query_params.get("country")
         if country:
-            queryset = queryset.filter(city__name__icontains=country)
+            queryset = queryset.filter(city__country__icontains=country)
 
         if self.action in ("list", "retrieve"):
             queryset = queryset.select_related("city")
 
         return queryset
+
+    @extend_schema(
+        summary="List airports",
+        description="Returns a list of airports with optional country filter.",
+        parameters=[
+            OpenApiParameter(
+                name="country",
+                type=OpenApiTypes.STR,
+                description="Filter by country",
+                required=False
+            )
+        ]
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
 
 class RouteViewSet(viewsets.ModelViewSet):

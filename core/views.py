@@ -5,6 +5,7 @@ from rest_framework import mixins
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from drf_spectacular.utils import extend_schema, extend_schema_view
 
 from core.models import (
     City,
@@ -53,6 +54,14 @@ from core.pagination import CityRolePagination, FlightOrderPagination
 from core.permissions import IsAdminUserOrReadOnly
 
 
+@extend_schema_view(
+    create=extend_schema(summary="Create a new city"),
+    list=extend_schema(summary="Get a list of cities"),
+    retrieve=extend_schema(summary="Get details of a city"),
+    update=extend_schema(summary="Update city"),
+    partial_update=extend_schema(summary="Partially update city"),
+    destroy=extend_schema(summary="Delete a city"),
+)
 class CityViewSet(viewsets.ModelViewSet):
     queryset = City.objects.all()
     serializer_class = CitySerializer

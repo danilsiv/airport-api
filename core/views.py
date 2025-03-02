@@ -209,6 +209,10 @@ class RouteViewSet(viewsets.ModelViewSet):
         return super().list(request, *args, **kwargs)
 
 
+@extend_schema_view(
+    list=extend_schema(summary="List roles"),
+    create=extend_schema(summary="Create role")
+)
 class RoleListView(generics.ListCreateAPIView):
     queryset = Role.objects.all()
     serializer_class = RoleSerializer

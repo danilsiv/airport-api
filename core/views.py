@@ -282,6 +282,14 @@ class CrewMemberViewSet(viewsets.ModelViewSet):
         return super().list(request, *args, **kwargs)
 
 
+@extend_schema_view(
+    create=extend_schema(summary="Create crew croup"),
+    list=extend_schema(summary="List crew groups"),
+    retrieve=extend_schema(summary="Get crew group details"),
+    update=extend_schema(summary="Update crew group"),
+    partial_update=extend_schema(summary="Partially update crew group"),
+    destroy=extend_schema(summary="Delete crew group"),
+)
 class CrewGroupViewSet(viewsets.ModelViewSet):
     queryset = CrewGroup.objects.all()
     serializer_class = CrewGroupSerializer

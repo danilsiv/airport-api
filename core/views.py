@@ -313,6 +313,10 @@ class CrewGroupViewSet(viewsets.ModelViewSet):
         return self.queryset
 
 
+@extend_schema_view(
+    create=extend_schema(summary="Create airplane type"),
+    list=extend_schema(summary="List airplane types")
+)
 class AirplaneTypeListView(generics.ListCreateAPIView):
     queryset = AirplaneType.objects.all()
     serializer_class = AirplaneTypeSerializer

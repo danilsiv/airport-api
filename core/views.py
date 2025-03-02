@@ -109,7 +109,7 @@ class AirportViewSet(viewsets.ModelViewSet):
             OpenApiParameter(
                 name="country",
                 type=OpenApiTypes.STR,
-                description="Filter by country",
+                description="Filter by country.",
                 required=False
             )
         ]
@@ -118,6 +118,13 @@ class AirportViewSet(viewsets.ModelViewSet):
         return super().list(request, *args, **kwargs)
 
 
+@extend_schema_view(
+    create=extend_schema(summary="Create route"),
+    retrieve=extend_schema(summary="Get route details"),
+    update=extend_schema(summary="Update route"),
+    partial_update=extend_schema(summary="Partially update route"),
+    destroy=extend_schema(summary="Delete route"),
+)
 class RouteViewSet(viewsets.ModelViewSet):
     queryset = Route.objects.all()
     serializer_class = RouteSerializer
@@ -160,6 +167,46 @@ class RouteViewSet(viewsets.ModelViewSet):
             )
 
         return queryset
+
+    @extend_schema(
+        summary="List routes",
+        description="Returns a list of routes with optional filter params.",
+        parameters=[
+            OpenApiParameter(
+                name="route_code",
+                type=OpenApiTypes.STR,
+                description="Filter by route using IATA codes in the format 'SOURCE-DESTINATION'. "
+                            "Example: 'JFK-LHR'.",
+                required=False
+            ),
+            OpenApiParameter(
+                name="source_name",
+                type=OpenApiTypes.STR,
+                description="Filter by name of source.",
+                required=False
+            ),
+            OpenApiParameter(
+                name="destination_name",
+                type=OpenApiTypes.STR,
+                description="Filter by name of destination.",
+                required=False
+            ),
+            OpenApiParameter(
+                name="source_iata",
+                type=OpenApiTypes.STR,
+                description="Filter by IATA of source.",
+                required=False
+            ),
+            OpenApiParameter(
+                name="destination_iata",
+                type=OpenApiTypes.STR,
+                description="Filter by IATA of destination.",
+                required=False
+            ),
+        ]
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
 
 class RoleListView(generics.ListCreateAPIView):

@@ -219,6 +219,14 @@ class RoleListView(generics.ListCreateAPIView):
     pagination_class = CityRolePagination
 
 
+@extend_schema_view(
+    create=extend_schema(summary="Create crew member"),
+    retrieve=extend_schema(summary="Get crew member details"),
+    update=extend_schema(summary="Update crew member"),
+    partial_update=extend_schema(summary="Partially update crew member"),
+    destroy=extend_schema(summary="Delete crew member"),
+    upload_photo=extend_schema(summary="Upload crew member photo")
+)
 class CrewMemberViewSet(viewsets.ModelViewSet):
     queryset = CrewMember.objects.all()
     serializer_class = CrewMemberSerializer
@@ -257,6 +265,21 @@ class CrewMemberViewSet(viewsets.ModelViewSet):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @extend_schema(
+        summary="List crew members",
+        description="Returns a list of crew members with optional role filter.",
+        parameters=[
+            OpenApiParameter(
+                name="role",
+                type=OpenApiTypes.STR,
+                description="Filter by role of crew member.",
+                required=False
+            )
+        ]
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
 
 class CrewGroupViewSet(viewsets.ModelViewSet):

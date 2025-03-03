@@ -149,6 +149,16 @@ REST_FRAMEWORK = {
         "rest_framework.permissions.IsAdminUser",
     ],
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "DEFAULT_THROTTLE_CLASSES": [
+        "rest_framework.throttling.AnonRateThrottle",
+        "core.throttling.AdminRateThrottle",
+        "core.throttling.CustomUserRateThrottle",
+    ],
+    "DEFAULT_THROTTLE_RATES": {
+        "anon": "50/hour",
+        "user": "100/hour",
+        "staff": "500/hour"
+    }
 }
 
 SPECTACULAR_SETTINGS = {

@@ -322,6 +322,13 @@ class AirplaneTypeListView(generics.ListCreateAPIView):
     serializer_class = AirplaneTypeSerializer
 
 
+@extend_schema_view(
+    create=extend_schema(summary="Create airplane"),
+    retrieve=extend_schema(summary="Get airplane details"),
+    update=extend_schema(summary="Update airplane"),
+    partial_update=extend_schema(summary="Partially update airplane"),
+    destroy=extend_schema(summary="Delete airplane"),
+)
 class AirplaneViewSet(viewsets.ModelViewSet):
     queryset = Airplane.objects.all()
     serializer_class = AirplaneBaseSerializer
@@ -330,11 +337,11 @@ class AirplaneViewSet(viewsets.ModelViewSet):
     def get_queryset(self) -> QuerySet:
         queryset = self.queryset
 
-        model_name = self.request.query_params.get("name")
+        model_name = self.request.query_params.get("model_name")
         if model_name:
             queryset = queryset.filter(model_name__icontains=model_name)
 
-        model_type = self.request.query_params.get("type")
+        model_type = self.request.query_params.get("model_type")
         if model_type:
             queryset = queryset.filter(type__name__icontains=model_type)
 
@@ -348,6 +355,27 @@ class AirplaneViewSet(viewsets.ModelViewSet):
         context["is_list_view"] = self.action == "list"
         context["is_detail_view"] = self.action == "retrieve"
         return context
+
+    @extend_schema(
+        summary="List airplanes",
+        description="Returns a list of airplanes with optional filter params.",
+        parameters=[
+            OpenApiParameter(
+                name="model_name",
+                type=OpenApiTypes.STR,
+                description="Filter by model name of airplane.",
+                required=False
+            ),
+            OpenApiParameter(
+                name="model_type",
+                type=OpenApiTypes.STR,
+                description="Filter by type of airplane.",
+                required=False
+            )
+        ]
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
 
 class SeatConfigurationViewSet(viewsets.ModelViewSet):

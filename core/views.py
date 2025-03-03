@@ -441,6 +441,13 @@ class SeatConfigurationViewSet(viewsets.ModelViewSet):
         return super().list(request, *args, **kwargs)
 
 
+@extend_schema_view(
+    create=extend_schema(summary="Create flight"),
+    retrieve=extend_schema(summary="Get flight details"),
+    update=extend_schema(summary="Update flight"),
+    partial_update=extend_schema(summary="Partially update flight"),
+    destroy=extend_schema(summary="Delete flight"),
+)
 class FlightViewSet(viewsets.ModelViewSet):
     queryset = Flight.objects.all()
     serializer_class = FlightSerializer
@@ -533,6 +540,50 @@ class FlightViewSet(viewsets.ModelViewSet):
             )
 
         return queryset
+
+    @extend_schema(
+        summary="List flights",
+        description="Returns a list of flights with optional filter params.",
+        parameters=[
+            OpenApiParameter(
+                name="departure_time_after",
+                type=OpenApiTypes.STR,
+                description="Filter flights departing before the specified date (YYYY-MM-DD format).",
+                required=False
+            ),
+            OpenApiParameter(
+                name="departure_time_before",
+                type=OpenApiTypes.STR,
+                description="Filter flights departing before the specified date (YYYY-MM-DD format).",
+                required=False
+            ),OpenApiParameter(
+                name="arrival_time_after",
+                type=OpenApiTypes.STR,
+                description="Filter flights arriving after the specified date (YYYY-MM-DD format).",
+                required=False
+            ),
+            OpenApiParameter(
+                name="arrival_time_before",
+                type=OpenApiTypes.STR,
+                description="Filter flights arriving before the specified date (YYYY-MM-DD format).",
+                required=False
+            ),
+            OpenApiParameter(
+                name="source_city",
+                type=OpenApiTypes.STR,
+                description="Filter flights by the departure city name",
+                required=False
+            ),
+            OpenApiParameter(
+                name="destination_city",
+                type=OpenApiTypes.STR,
+                description="Filter flights by the destination city name.",
+                required=False
+            ),
+        ]
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
 
 class OrderListCreateRetrieveView(

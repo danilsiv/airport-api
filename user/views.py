@@ -17,6 +17,10 @@ class CreateUserView(generics.CreateAPIView):
     permission_classes = ()
 
 
+@extend_schema(
+    summary="Login user",
+    description="Authenticates user and returns a token for further API access."
+)
 class LoginUserView(ObtainAuthToken):
     renderer_classes = api_settings.DEFAULT_RENDERER_CLASSES
     serializer_class = AuthTokenSerializer

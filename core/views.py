@@ -9,6 +9,7 @@ from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiPara
 from drf_spectacular.types import OpenApiTypes
 
 from core.models import (
+    SEATS_CLASS_CHOICES,
     City,
     Airport,
     Route,
@@ -378,6 +379,13 @@ class AirplaneViewSet(viewsets.ModelViewSet):
         return super().list(request, *args, **kwargs)
 
 
+@extend_schema_view(
+    create=extend_schema(summary="Create seat configuration"),
+    retrieve=extend_schema(summary="Get seat configuration details"),
+    update=extend_schema(summary="Update seat configuration"),
+    partial_update=extend_schema(summary="Partially update seat configuration"),
+    destroy=extend_schema(summary="Delete seat configuration"),
+)
 class SeatConfigurationViewSet(viewsets.ModelViewSet):
     queryset = SeatConfiguration.objects.all()
     serializer_class = SeatConfigurationSerializer
@@ -409,6 +417,28 @@ class SeatConfigurationViewSet(viewsets.ModelViewSet):
             return queryset.select_related()
 
         return queryset
+
+    @extend_schema(
+        summary="List seat configurations",
+        description="Returns a list of seat configurations with optional filter params.",
+        parameters=[
+            OpenApiParameter(
+                name="airplane",
+                type=OpenApiTypes.STR,
+                description="Filter configurations by airplane.",
+                required=False
+            ),
+            OpenApiParameter(
+                name="seats_class",
+                type=OpenApiTypes.STR,
+                description="Filter by seat class. Available options: "
+                            f"{', '.join([f'{db} ({dp})' for db, dp in SEATS_CLASS_CHOICES])}.",
+                required=False
+            )
+        ]
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
 
 class FlightViewSet(viewsets.ModelViewSet):

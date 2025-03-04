@@ -1,7 +1,7 @@
 from django.test import TestCase
 from django.core.exceptions import ValidationError
 
-from core.models import City, Airport, Route, Role, CrewMember
+from core.models import City, Airport, Route, Role, CrewMember, CrewGroup
 
 
 def create_city(**params) -> City:
@@ -47,6 +47,17 @@ def create_crew_member(**params) -> CrewMember:
     return CrewMember.objects.create(**defaults)
 
 
+def create_crew_group(crew_code: str="BB222", **params) -> CrewGroup:
+    crew_group = CrewGroup.objects.create(crew_code=crew_code)
+
+    crew_group.pilots.set(params.get("pilots", []))
+    crew_group.pilots.set(params.get("stewards", []))
+    crew_group.pilots.set(params.get("technicians", []))
+    crew_group.pilots.set(params.get("additional_staff", []))
+
+    return crew_group
+
+
 class CityTest(TestCase):
     def test_str_method(self) -> None:
         city = create_city()
@@ -86,3 +97,9 @@ class CrewMemberTest(TestCase):
         member = create_crew_member()
         expected_result = f"{member.first_name} {member.last_name} ({member.role.name})"
         self.assertEqual(str(member), expected_result)
+
+
+class CrewGroupTest(TestCase):
+    def test_str_method(self) -> None:
+        crew_group = create_crew_group()
+        self.assertEqual(str(crew_group), f"Crew {crew_group.crew_code}")

@@ -1,7 +1,7 @@
 from django.test import TestCase
 from django.core.exceptions import ValidationError
 
-from core.models import City, Airport
+from core.models import City, Airport, Route, Role
 
 
 def create_city(**params) -> City:
@@ -25,6 +25,21 @@ def create_airport(**params) -> Airport:
     return Airport.objects.create(**defaults)
 
 
+def create_route(**params):
+    defaults = {
+        "source": create_airport(iata_code="AAA"),
+        "destination": create_airport(iata_code="BBB"),
+        "distance": 5555
+    }
+    defaults.update(params)
+
+    return Route.objects.create(**defaults)
+
+
+def create_role(name: str="test_role") -> Role:
+    return Role.objects.create(name=name)
+
+
 class CityTest(TestCase):
     def test_str_method(self) -> None:
         city = create_city()
@@ -41,3 +56,20 @@ class AirportTest(TestCase):
     def test_str_method(self) -> None:
         airport = create_airport()
         self.assertEqual(str(airport), f"{airport.name} {airport.iata_code}")
+
+
+class RouteTest(TestCase):
+    def test_unique_source_and_destination_validation(self) -> None:
+        airport = create_airport()
+        with self.assertRaises(ValidationError):
+            create_route(source=airport, destination=airport)
+
+    def test_str_method(self) -> None:
+        route = create_route()
+        self.assertEqual(str(route), route.route_code)
+
+
+class RoleTest(TestCase):
+    def test_str_method(self) -> None:
+        role = create_role()
+        self.assertEqual(str(role), role.name)

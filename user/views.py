@@ -1,11 +1,8 @@
-from drf_spectacular.utils import extend_schema, extend_schema_view
+from drf_spectacular.utils import extend_schema
 from rest_framework import generics
-from rest_framework.authentication import TokenAuthentication
-from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.settings import api_settings
 
-from user.serializers import UserSerializer, AuthTokenSerializer
+from user.serializers import UserSerializer
 
 
 @extend_schema(
@@ -18,21 +15,11 @@ class CreateUserView(generics.CreateAPIView):
 
 
 @extend_schema(
-    summary="Login user",
-    description="Authenticates user and returns a token for further API access."
-)
-class LoginUserView(ObtainAuthToken):
-    renderer_classes = api_settings.DEFAULT_RENDERER_CLASSES
-    serializer_class = AuthTokenSerializer
-
-
-@extend_schema(
     summary="Manage authenticated user",
     description="Retrieve or update details of the currently authenticated user."
 )
 class ManageUserView(generics.RetrieveUpdateAPIView):
     serializer_class = UserSerializer
-    authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
 
     def get_object(self):

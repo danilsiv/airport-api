@@ -1,7 +1,7 @@
 from django.test import TestCase
 from django.core.exceptions import ValidationError
 
-from core.models import City, Airport, Route, Role
+from core.models import City, Airport, Route, Role, CrewMember
 
 
 def create_city(**params) -> City:
@@ -10,7 +10,6 @@ def create_city(**params) -> City:
         "country": "test_country"
     }
     defaults.update(params)
-
     return City.objects.create(**defaults)
 
 
@@ -21,7 +20,6 @@ def create_airport(**params) -> Airport:
         "city": create_city()
     }
     defaults.update(params)
-
     return Airport.objects.create(**defaults)
 
 
@@ -32,12 +30,21 @@ def create_route(**params):
         "distance": 5555
     }
     defaults.update(params)
-
     return Route.objects.create(**defaults)
 
 
 def create_role(name: str="test_role") -> Role:
     return Role.objects.create(name=name)
+
+
+def create_crew_member(**params) -> CrewMember:
+    defaults = {
+        "first_name": "test_first_name",
+        "last_name": "test_last_name",
+        "role": create_role()
+    }
+    defaults.update(params)
+    return CrewMember.objects.create(**defaults)
 
 
 class CityTest(TestCase):
@@ -51,7 +58,6 @@ class AirportTest(TestCase):
         airport = create_airport(iata_code="invalid")
         with self.assertRaises(ValidationError):
             airport.full_clean()
-
 
     def test_str_method(self) -> None:
         airport = create_airport()
@@ -73,3 +79,10 @@ class RoleTest(TestCase):
     def test_str_method(self) -> None:
         role = create_role()
         self.assertEqual(str(role), role.name)
+
+
+class CrewMemberTest(TestCase):
+    def test_str_method(self) -> None:
+        member = create_crew_member()
+        expected_result = f"{member.first_name} {member.last_name} ({member.role.name})"
+        self.assertEqual(str(member), expected_result)

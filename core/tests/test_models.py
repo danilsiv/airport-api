@@ -12,6 +12,7 @@ from core.tests.factories import (
     create_airplane,
     create_seat_configuration,
     create_flight,
+    create_order,
 )
 
 
@@ -122,3 +123,10 @@ class FlightTest(TestCase):
         expected_result = (f"Flight {flight.flight_number} ({flight.route}) "
                            f"{flight.departure_time} - {flight.arrival_time}")
         self.assertEqual(str(flight), expected_result)
+
+
+
+class OrderTest(TestCase):
+    def test_str_method(self) -> None:
+        order = create_order()
+        self.assertEqual(str(order), str(order.created_at))

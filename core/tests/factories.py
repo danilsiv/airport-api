@@ -9,7 +9,9 @@ from core.models import (
     Airplane,
     SeatConfiguration,
     Flight,
+    Order,
 )
+from user.models import User
 
 
 def create_city(**params) -> City:
@@ -101,3 +103,11 @@ def create_flight(**params) -> Flight:
     }
     defaults.update(params)
     return Flight.objects.create(**defaults)
+
+
+def create_order(**params) -> Order:
+    defaults = {
+        "user": User.objects.create_user(email="test@user.com", password="test1234user")
+    }
+    defaults.update(params)
+    return Order.objects.create(**defaults)

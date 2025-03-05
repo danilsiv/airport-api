@@ -10,6 +10,7 @@ from core.models import (
     SeatConfiguration,
     Flight,
     Order,
+    Ticket
 )
 from user.models import User
 
@@ -69,7 +70,8 @@ def create_crew_group(crew_code: str="BB222", **params) -> CrewGroup:
 
 
 def create_airplane_type(name: str="test_airplane_type") -> AirplaneType:
-    return AirplaneType.objects.create(name=name)
+    airplane_type, created = AirplaneType.objects.get_or_create(name=name)
+    return airplane_type
 
 
 def create_airplane(**params) -> Airplane:
@@ -111,3 +113,23 @@ def create_order(**params) -> Order:
     }
     defaults.update(params)
     return Order.objects.create(**defaults)
+
+
+def create_ticket(**params) -> Ticket:
+    create_seat_configuration(
+        seats_class=params.get("seat_class", "EC"),
+        airplane=params.get("airplane", create_airplane(model_name="special"))
+    )
+    defaults = {
+        "row": 1,
+        "seat": 1,
+        "passenger_first_name": "test_first_name",
+        "passenger_last_name": "test_last_name",
+        "seat_class": "EC",
+        "flight": create_flight(
+            airplane=params.pop("airplane", Airplane.objects.get(model_name="special"))
+        ),
+        "order": create_order()
+    }
+    defaults.update(params)
+    return Ticket.objects.create(**defaults)

@@ -1,6 +1,7 @@
 from django.test import TestCase
 from django.core.exceptions import ValidationError
 
+from core.models import SeatConfiguration
 from core.tests.factories import (
     create_city,
     create_airport,
@@ -13,6 +14,7 @@ from core.tests.factories import (
     create_seat_configuration,
     create_flight,
     create_order,
+    create_ticket,
 )
 
 
@@ -130,3 +132,31 @@ class OrderTest(TestCase):
     def test_str_method(self) -> None:
         order = create_order()
         self.assertEqual(str(order), str(order.created_at))
+
+
+class TicketTest(TestCase):
+    def test_airplane_exist_validation(self) -> None:
+        ticket = create_ticket()
+        ticket.flight.airplane = None
+        with self.assertRaises(ValidationError):
+            ticket.full_clean()
+
+    def test_seat_configuration_exist_validation(self) -> None:
+        ticket = create_ticket()
+        SeatConfiguration.objects.filter().delete()
+        with self.assertRaises(ValidationError):
+            ticket.full_clean()
+
+    def test_max_seats_max_rows_validation(self) -> None:
+        ticket = create_ticket()
+        with self.assertRaises(ValidationError):
+            ticket.seat = 5000
+            ticket.full_clean()
+        with self.assertRaises(ValidationError):
+            ticket.row = 5000
+            ticket.full_clean()
+
+    def test_str_method(self) -> None:
+        ticket = create_ticket()
+        expected_result = f"Flight: {ticket.flight.flight_number} (row: {ticket.row}, seat: {ticket.seat})"
+        self.assertEqual(str(ticket), expected_result)

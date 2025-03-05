@@ -11,6 +11,7 @@ from core.tests.factories import (
     create_airplane_type,
     create_airplane,
     create_seat_configuration,
+    create_flight,
 )
 
 
@@ -106,3 +107,18 @@ class SeatConfigurationTest(TestCase):
         expected_result = (f"{conf.get_seats_class_display()} "
                            f"Configuration ({conf.airplane.model_name})")
         self.assertEqual(str(conf), expected_result)
+
+
+class FlightTest(TestCase):
+    def test_departure_arrival_time_validation(self) -> None:
+        with self.assertRaises(ValidationError):
+            create_flight(
+                departure_time="2020-02-22 02:02:00",
+                arrival_time="2020-02-02 02:02:00"
+            )
+
+    def test_str_method(self) -> None:
+        flight = create_flight()
+        expected_result = (f"Flight {flight.flight_number} ({flight.route}) "
+                           f"{flight.departure_time} - {flight.arrival_time}")
+        self.assertEqual(str(flight), expected_result)

@@ -32,6 +32,18 @@ class AirportTest(TestCase):
 
 
 class RouteTest(TestCase):
+    def test_route_code_attribute(self) -> None:
+        route = create_route()
+        self.assertTrue(route.route_code)
+        expected_result = f"{route.source.iata_code}-{route.destination.iata_code}"
+        self.assertEqual(route.route_code, expected_result)
+
+    def test_name_property(self) -> None:
+        route = create_route()
+        expected_result = f"{route.source.city.name} - {route.destination.city.name}"
+        self.assertTrue(route.name)
+        self.assertEqual(route.name, expected_result)
+
     def test_unique_source_and_destination_validation(self) -> None:
         airport = create_airport()
         with self.assertRaises(ValidationError):
@@ -49,6 +61,11 @@ class RoleTest(TestCase):
 
 
 class CrewMemberTest(TestCase):
+    def test_full_name_property(self) -> None:
+        member = create_crew_member()
+        self.assertTrue(member.full_name)
+        self.assertEqual(member.full_name, f"{member.first_name} {member.last_name}")
+
     def test_str_method(self) -> None:
         member = create_crew_member()
         expected_result = f"{member.first_name} {member.last_name} ({member.role.name})"
@@ -56,6 +73,11 @@ class CrewMemberTest(TestCase):
 
 
 class CrewGroupTest(TestCase):
+    def test_description_property(self) -> None:
+        crew_group = create_crew_group()
+        self.assertTrue(crew_group.description)
+        self.assertEqual(crew_group.description, "Unassigned crew")
+
     def test_str_method(self) -> None:
         crew_group = create_crew_group()
         self.assertEqual(str(crew_group), f"Crew {crew_group.crew_code}")
@@ -74,7 +96,13 @@ class AirplaneTest(TestCase):
 
 
 class SeatConfigurationTest(TestCase):
+    def test_num_of_seats_property(self) -> None:
+        conf = create_seat_configuration()
+        self.assertTrue(conf.num_of_seats)
+        self.assertEqual(conf.num_of_seats, conf.seats_in_row * conf.rows)
+
     def test_str_method(self) -> None:
         conf = create_seat_configuration()
-        expected_result = f"{conf.get_seats_class_display()} Configuration ({conf.airplane.model_name})"
+        expected_result = (f"{conf.get_seats_class_display()} "
+                           f"Configuration ({conf.airplane.model_name})")
         self.assertEqual(str(conf), expected_result)

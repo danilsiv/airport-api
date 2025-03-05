@@ -10,6 +10,7 @@ from core.tests.factories import (
     create_crew_group,
     create_airplane_type,
     create_airplane,
+    create_seat_configuration,
 )
 
 
@@ -70,3 +71,10 @@ class AirplaneTest(TestCase):
     def test_str_method(self) -> None:
         airplane = create_airplane()
         self.assertEqual(str(airplane), airplane.model_name)
+
+
+class SeatConfigurationTest(TestCase):
+    def test_str_method(self) -> None:
+        conf = create_seat_configuration()
+        expected_result = f"{conf.get_seats_class_display()} Configuration ({conf.airplane.model_name})"
+        self.assertEqual(str(conf), expected_result)

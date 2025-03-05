@@ -6,7 +6,7 @@ from core.models import (
     CrewMember,
     CrewGroup,
     AirplaneType,
-    Airplane
+    Airplane, SeatConfiguration
 )
 
 
@@ -67,6 +67,7 @@ def create_crew_group(crew_code: str="BB222", **params) -> CrewGroup:
 def create_airplane_type(name: str="test_airplane_type") -> AirplaneType:
     return AirplaneType.objects.create(name=name)
 
+
 def create_airplane(**params) -> Airplane:
     defaults = {
         "model_name": "test_model_name",
@@ -74,3 +75,14 @@ def create_airplane(**params) -> Airplane:
     }
     defaults.update(params)
     return Airplane.objects.create(**defaults)
+
+
+def create_seat_configuration(**params) -> SeatConfiguration:
+    defaults = {
+        "seats_class": "EC",
+        "rows": 15,
+        "seats_in_row": 5,
+        "airplane": create_airplane()
+    }
+    defaults.update(params)
+    return SeatConfiguration.objects.create(**defaults)

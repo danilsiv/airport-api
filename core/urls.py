@@ -31,11 +31,11 @@ router.register("orders", OrderListCreateRetrieveView)
 
 urlpatterns = [
     path("", include(router.urls)),
-    path("roles/", RoleListView.as_view(), name="role_list"),
+    path("roles/", RoleListView.as_view(), name="role-list"),
     path(
         "airplane-types/",
         AirplaneTypeListView.as_view(),
-        name="airplane_type_list"
+        name="airplane-type-list"
     )
 ]
 

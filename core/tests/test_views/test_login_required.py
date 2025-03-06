@@ -1,4 +1,5 @@
 from rest_framework import status
+from rest_framework.response import Response
 from rest_framework.test import APIClient
 
 from django.test import TestCase
@@ -19,9 +20,45 @@ from core.tests.factories import (
 )
 
 
+def generate_responses(view_name: str, instance_id: int = None, instance_data: dict = None,
+                       action_list: list[str] = None) -> list[Response]:
+    client = APIClient()
+
+    if not action_list:
+        action_list = ["get", "retrieve", "post", "put", "patch", "delete"]
+
+    responses = []
+
+    if "get" in action_list:
+        responses.append(client.get(reverse(f"core:{view_name}-list")))
+    if "post" in action_list:
+        responses.append(client.post(reverse(f"core:{view_name}-list"), instance_data))
+
+    if instance_id:
+        if "retrieve" in action_list:
+            responses.append(client.get(
+                reverse(f"core:{view_name}-detail", args=[instance_id])
+            ))
+        if "put" in action_list:
+            responses.append(client.put(
+                reverse(f"core:{view_name}-detail", args=[instance_id]), instance_data
+            ))
+        if "patch" in action_list:
+            responses.append(client.patch(
+                reverse(f"core:{view_name}-detail", args=[instance_id]), instance_data
+            ))
+        if "delete" in action_list:
+            responses.append(client.delete(
+                reverse(f"core:{view_name}-detail", args=[instance_id])
+            ))
+
+    return responses
+
+
 class UnauthenticatedAirportApiTest(TestCase):
     def setUp(self) -> None:
         self.client = APIClient()
+
         self.city = create_city()
         self.airport = create_airport()
         self.route, self.route_data = create_route(as_tuple=True)
@@ -33,101 +70,67 @@ class UnauthenticatedAirportApiTest(TestCase):
         self.order, self.order_data = create_order(as_tuple=True)
 
     def test_available_endpoints(self) -> None:
+        read_only_actions = ["get", "retrieve"]
 
-        responses = (
-            self.client.get(reverse("core:city-list")),
-            self.client.get(reverse("core:city-detail", args=[self.city.id])),
-
-            self.client.get(reverse("core:airport-list")),
-            self.client.get(reverse("core:airport-detail", args=[self.airport.id])),
-
-            self.client.get(reverse("core:route-list")),
-            self.client.get(reverse("core:route-detail", args=[self.route.id])),
-
-            self.client.get(reverse("core:airplane-list")),
-            self.client.get(reverse("core:airplane-detail", args=[self.airplane.id])),
-
-            self.client.get(reverse("core:flight-list")),
-            self.client.get(reverse("core:flight-detail", args=[self.flight.id])),
-        )
+        responses = sum([
+            generate_responses("city", self.city.id, action_list=read_only_actions),
+            generate_responses("airport", self.airport.id, action_list=read_only_actions),
+            generate_responses("route", self.route.id, action_list=read_only_actions),
+            generate_responses("airplane", self.airplane.id, action_list=read_only_actions),
+            generate_responses("flight", self.flight.id, action_list=read_only_actions),
+        ], [])
 
         for response in responses:
             self.assertEqual(
-                response.status_code,
-                status.HTTP_200_OK,
+                response.status_code, status.HTTP_200_OK,
                 f"Unexpected status {response.status_code} for {response.request['PATH_INFO']}"
             )
 
     def test_unavailable_endpoints(self) -> None:
-        city_data = create_city(as_dict=True)
-        airport_data = create_airport(as_dict=True)
-        member_data = create_crew_member(as_dict=True)
-        crew_group_data = create_crew_group(as_dict=True)
-        airplane_type_data = create_airplane_type(as_dict=True)
-        airplane_data = create_airplane(as_dict=True)
-        conf_data = create_seat_configuration(as_dict=True)
-        flight_data = create_flight(as_dict=True)
+        write_actions = ["post", "put", "patch", "delete"]
 
-        responses = (
-            self.client.post(reverse("core:city-list"), city_data),
-            self.client.put(reverse("core:city-detail", args=[self.city.id]), city_data),
-            self.client.patch(reverse("core:city-detail", args=[self.city.id]), city_data),
-            self.client.delete(reverse("core:city-detail", args=[self.city.id])),
+        responses = sum([
+            generate_responses(
+                "city", self.city.id, create_city(as_dict=True), action_list=write_actions
+            ),
+            generate_responses(
+                "airport", self.airport.id, create_airport(as_dict=True), action_list=write_actions
+            ),
+            generate_responses(
+                "route", self.route, self.route_data, action_list=write_actions
+            ),
+            generate_responses(
+                "airplane", self.airplane.id, create_airplane(as_dict=True), action_list=write_actions
+            ),
+            generate_responses(
+                "flight", self.flight.id, create_flight(as_dict=True), action_list=write_actions
+            ),
+            generate_responses(
+                "crewmember", self.crew_member.id, create_crew_member(as_dict=True)
+            ),
+            generate_responses(
+                "crewgroup", self.crew_group.id, create_crew_group(as_dict=True)
+            ),
+            generate_responses(
+                "seatconfiguration",
+                self.seat_configuration.id,
+                create_seat_configuration(as_dict=True)
+            ),
+            generate_responses(
+                "role", instance_data=create_role(as_dict=True), action_list=["get", "post"]
+            ),
+            generate_responses(
+                "airplane-type",
+                instance_data=create_airplane_type(as_dict=True),
+                action_list=["get", "post"]
+            ),
+            generate_responses(
+                "order", self.order.id, self.order_data, action_list=["get", "retrieve", "post"]
+            ),
+        ], [])
 
-            self.client.post(reverse("core:airport-list"), airport_data),
-            self.client.put(reverse("core:airport-detail", args=[self.airport.id]), airport_data),
-            self.client.patch(reverse("core:airport-detail", args=[self.airport.id]), airport_data),
-            self.client.delete(reverse("core:airport-detail", args=[self.airport.id])),
-
-            self.client.post(reverse("core:route-list"), self.route_data),
-            self.client.put(reverse("core:route-detail", args=[self.route.id]), self.route_data),
-            self.client.patch(reverse("core:route-detail", args=[self.route.id]), self.route_data),
-            self.client.delete(reverse("core:route-detail", args=[self.route.id])),
-
-            self.client.get(reverse("core:role-list")),
-            self.client.post(reverse("core:role-list"), create_role(as_dict=True)),
-
-            self.client.get(reverse("core:crewmember-list")),
-            self.client.get(reverse("core:crewmember-detail", args=[self.crew_member.id])),
-            self.client.post(reverse("core:crewmember-list"), member_data),
-            self.client.put(reverse("core:crewmember-detail", args=[self.crew_member.id]), member_data),
-            self.client.patch(reverse("core:crewmember-detail", args=[self.crew_member.id]), member_data),
-            self.client.delete(reverse("core:crewmember-detail", args=[self.crew_member.id])),
-
-            self.client.get(reverse("core:crewgroup-list")),
-            self.client.get(reverse("core:crewgroup-detail", args=[self.crew_group.id])),
-            self.client.post(reverse("core:crewgroup-list"), crew_group_data),
-            self.client.put(reverse("core:crewgroup-detail", args=[self.crew_group.id]), crew_group_data),
-            self.client.patch(reverse("core:crewgroup-detail", args=[self.crew_group.id]), crew_group_data),
-            self.client.delete(reverse("core:crewgroup-detail", args=[self.crew_group.id]), crew_group_data),
-
-            self.client.get(reverse("core:airplane-type-list")),
-            self.client.post(reverse("core:airplane-type-list"), airplane_type_data),
-
-            self.client.post(reverse("core:airplane-list"), airplane_data),
-            self.client.put(reverse("core:airplane-detail", args=[self.airplane.id]), airplane_data),
-            self.client.patch(reverse("core:airport-detail", args=[self.airplane.id]), airplane_data),
-            self.client.delete(reverse("core:airport-detail", args=[self.airplane.id])),
-
-            self.client.get(reverse("core:seatconfiguration-list")),
-            self.client.get(reverse("core:seatconfiguration-detail", args=[self.seat_configuration.id])),
-            self.client.post(reverse("core:seatconfiguration-list"), conf_data),
-            self.client.put(reverse("core:seatconfiguration-detail", args=[self.seat_configuration.id]), conf_data),
-            self.client.patch(reverse("core:seatconfiguration-detail", args=[self.seat_configuration.id]), conf_data),
-            self.client.delete(reverse("core:seatconfiguration-detail", args=[self.seat_configuration.id])),
-
-            self.client.post(reverse("core:flight-list"), flight_data),
-            self.client.put(reverse("core:flight-detail", args=[self.flight.id]), flight_data),
-            self.client.patch(reverse("core:flight-detail", args=[self.flight.id]), flight_data),
-            self.client.delete(reverse("core:flight-detail", args=[self.flight.id])),
-
-            self.client.get(reverse("core:order-list")),
-            self.client.get(reverse("core:order-detail", args=[self.order.id])),
-            self.client.post(reverse("core:order-list"), self.order_data),
-        )
         for response in responses:
             self.assertEqual(
-                response.status_code,
-                status.HTTP_401_UNAUTHORIZED,
+                response.status_code, status.HTTP_401_UNAUTHORIZED,
                 f"Unexpected status {response.status_code} for {response.request['PATH_INFO']}"
             )

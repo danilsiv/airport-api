@@ -1,3 +1,7 @@
+import random
+import string
+from django.contrib.auth import get_user_model
+
 from core.models import (
     City,
     Airport,
@@ -12,78 +16,91 @@ from core.models import (
     Order,
     Ticket
 )
-from user.models import User
 
 
-def create_city(**params) -> City:
+def generate_random_iata_code():
+    return "".join(random.choices(string.ascii_uppercase, k=3))
+
+
+def create_city(as_dict: bool=False, **params) -> City | dict:
     defaults = {
         "name": "test_city",
         "country": "test_country"
     }
     defaults.update(params)
-    return City.objects.create(**defaults)
+    return defaults if as_dict else City.objects.create(**defaults)
 
 
-def create_airport(**params) -> Airport:
+def create_airport(as_dict: bool=False, **params) -> Airport | dict:
     defaults = {
         "name": "test_airport",
-        "iata_code": "TST",
+        "iata_code": generate_random_iata_code(),
         "city": create_city()
     }
     defaults.update(params)
-    return Airport.objects.create(**defaults)
+    return defaults if as_dict else Airport.objects.create(**defaults)
 
 
-def create_route(**params):
+def create_route(as_tuple: bool=False, **params) -> Route | tuple:
     defaults = {
-        "source": create_airport(iata_code="AAA"),
-        "destination": create_airport(iata_code="BBB"),
+        "source": create_airport(),
+        "destination": create_airport(),
         "distance": 5555
     }
     defaults.update(params)
+    if as_tuple:
+        return Route.objects.create(**defaults), defaults
     return Route.objects.create(**defaults)
 
 
-def create_role(name: str="test_role") -> Role:
-    return Role.objects.create(name=name)
+def create_role(as_dict: bool=False, **params) -> Role | dict:
+    defaults = {
+        "name": "test_role"
+    }
+    defaults.update(params)
+    return defaults if as_dict else Role.objects.get_or_create(**defaults)[0]
 
 
-def create_crew_member(**params) -> CrewMember:
+def create_crew_member(as_dict: bool=False, **params) -> CrewMember | dict:
     defaults = {
         "first_name": "test_first_name",
         "last_name": "test_last_name",
         "role": create_role()
     }
     defaults.update(params)
-    return CrewMember.objects.create(**defaults)
+    return defaults if as_dict else CrewMember.objects.create(**defaults)
 
 
-def create_crew_group(crew_code: str="BB222", **params) -> CrewGroup:
-    crew_group = CrewGroup.objects.create(crew_code=crew_code)
+def create_crew_group(as_dict: bool=False, **params) -> CrewGroup | dict:
+    defaults = {"crew_code": "BB222"}
+    crew_group = CrewGroup.objects.get_or_create(**defaults)[0]
+    defaults.update(params)
 
     crew_group.pilots.set(params.get("pilots", []))
     crew_group.pilots.set(params.get("stewards", []))
     crew_group.pilots.set(params.get("technicians", []))
     crew_group.pilots.set(params.get("additional_staff", []))
 
-    return crew_group
+    return defaults if as_dict else crew_group
 
 
-def create_airplane_type(name: str="test_airplane_type") -> AirplaneType:
-    airplane_type, created = AirplaneType.objects.get_or_create(name=name)
-    return airplane_type
+def create_airplane_type(as_dict: bool=False, **params) -> AirplaneType | dict:
+    defaults = {"name": "test_airplane_type"}
+    defaults.update(params)
+    airplane_type, created = AirplaneType.objects.get_or_create(**defaults)
+    return defaults if as_dict else airplane_type
 
 
-def create_airplane(**params) -> Airplane:
+def create_airplane(as_dict: bool=False, **params) -> Airplane | dict:
     defaults = {
         "model_name": "test_model_name",
         "type": create_airplane_type()
     }
     defaults.update(params)
-    return Airplane.objects.create(**defaults)
+    return defaults if as_dict else Airplane.objects.create(**defaults)
 
 
-def create_seat_configuration(**params) -> SeatConfiguration:
+def create_seat_configuration(as_dict: bool=False, **params) -> SeatConfiguration | dict:
     defaults = {
         "seats_class": "EC",
         "rows": 15,
@@ -91,10 +108,10 @@ def create_seat_configuration(**params) -> SeatConfiguration:
         "airplane": create_airplane()
     }
     defaults.update(params)
-    return SeatConfiguration.objects.create(**defaults)
+    return defaults if as_dict else SeatConfiguration.objects.create(**defaults)
 
 
-def create_flight(**params) -> Flight:
+def create_flight(as_dict: bool=False, **params) -> Flight | dict:
     defaults = {
         "flight_number": "AA1234",
         "route": create_route(),
@@ -104,14 +121,16 @@ def create_flight(**params) -> Flight:
         "crew": create_crew_group()
     }
     defaults.update(params)
-    return Flight.objects.create(**defaults)
+    return defaults if as_dict else Flight.objects.create(**defaults)
 
 
-def create_order(**params) -> Order:
+def create_order(as_tuple: bool=False, **params) -> Order | tuple:
     defaults = {
-        "user": User.objects.create_user(email="test@user.com", password="test1234user")
+        "user": get_user_model().objects.create_user(email="test@user.com", password="test123user")
     }
     defaults.update(params)
+    if as_tuple:
+        return Order.objects.create(**defaults), defaults
     return Order.objects.create(**defaults)
 
 

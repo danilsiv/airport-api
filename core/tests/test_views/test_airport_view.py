@@ -16,7 +16,7 @@ def detail_url(airport_id: int):
     return reverse("core:airport-detail", args=[airport_id])
 
 
-class AdminCityApiTest(TestCase):
+class AdminAirportApiTest(TestCase):
     def setUp(self) -> None:
         self.client = APIClient()
         self.user = get_user_model().objects.create_user(
@@ -60,6 +60,6 @@ class AdminCityApiTest(TestCase):
         airport = Airport.objects.get(id=response.data["id"])
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(response.data["name"], airport.name)
-        self.assertEqual(response.data["iata_code"], airport.iata_code)
-        self.assertEqual(response.data["city"], airport.city.id)
+        self.assertEqual(payload["name"], airport.name)
+        self.assertEqual(payload["iata_code"], airport.iata_code)
+        self.assertEqual(payload["city"], airport.city.id)

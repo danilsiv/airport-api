@@ -16,6 +16,7 @@ from core.models import (
     Order,
     Ticket
 )
+from user.models import User
 
 
 def generate_random_iata_code():
@@ -124,9 +125,9 @@ def create_flight(as_dict: bool=False, **params) -> Flight | dict:
     return defaults if as_dict else Flight.objects.create(**defaults)
 
 
-def create_order(as_tuple: bool=False, **params) -> Order | tuple:
+def create_order(as_tuple: bool=False, user: User=None, **params) -> Order | tuple:
     defaults = {
-        "user": get_user_model().objects.create_user(email="test@user.com", password="test123user")
+        "user": user or get_user_model().objects.create_user(email="test@user.com", password="test123user")
     }
     defaults.update(params)
     if as_tuple:

@@ -166,3 +166,49 @@ class AuthenticatedUserAirportApiTest(UnauthenticatedAirportApiTest):
             order_retrieve.status_code, status.HTTP_200_OK,
             f"Unexpected status {order_retrieve.status_code} for {order_retrieve.request['PATH_INFO']}"
         )
+
+    def test_unavailable_endpoints(self) -> None:
+        write_actions = ["post", "put", "patch", "delete"]
+
+        responses = sum([
+            self.generate_responses(
+                "city", self.city.id, create_city(as_dict=True), action_list=write_actions
+            ),
+            self.generate_responses(
+                "airport", self.airport.id, create_airport(as_dict=True), action_list=write_actions
+            ),
+            self.generate_responses(
+                "route", self.route, self.route_data, action_list=write_actions
+            ),
+            self.generate_responses(
+                "airplane", self.airplane.id, create_airplane(as_dict=True), action_list=write_actions
+            ),
+            self.generate_responses(
+                "flight", self.flight.id, create_flight(as_dict=True), action_list=write_actions
+            ),
+            self.generate_responses(
+                "crewmember", self.crew_member.id, create_crew_member(as_dict=True)
+            ),
+            self.generate_responses(
+                "crewgroup", self.crew_group.id, create_crew_group(as_dict=True)
+            ),
+            self.generate_responses(
+                "seatconfiguration",
+                self.seat_configuration.id,
+                create_seat_configuration(as_dict=True)
+            ),
+            self.generate_responses(
+                "role", instance_data=create_role(as_dict=True), action_list=["get", "post"]
+            ),
+            self.generate_responses(
+                "airplane-type",
+                instance_data=create_airplane_type(as_dict=True),
+                action_list=["get", "post"]
+            )
+        ], [])
+
+        for response in responses:
+            self.assertEqual(
+                response.status_code, status.HTTP_403_FORBIDDEN,
+                f"Unexpected status {response.status_code} for {response.request['PATH_INFO']}"
+            )

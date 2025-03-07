@@ -72,7 +72,10 @@ def create_crew_member(as_dict: bool=False, **params) -> CrewMember | dict:
         "role": create_role()
     }
     defaults.update(params)
-    return defaults if as_dict else CrewMember.objects.create(**defaults)
+    if as_dict:
+        defaults["role"] = defaults["role"].id
+        return defaults
+    return CrewMember.objects.create(**defaults)
 
 
 def create_crew_group(as_dict: bool=False, **params) -> CrewGroup | dict:

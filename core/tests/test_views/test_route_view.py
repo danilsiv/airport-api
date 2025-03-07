@@ -6,7 +6,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 from core.models import Route
-from core.serializers import RouteListSerializer, RouteRetrieveSerializer, RouteSerializer
+from core.serializers import RouteListSerializer, RouteRetrieveSerializer
 from core.tests.factories import create_airport, create_route
 
 

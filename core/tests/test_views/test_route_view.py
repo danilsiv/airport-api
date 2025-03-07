@@ -41,46 +41,25 @@ class AdminRouteApiTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["results"], serializer.data)
 
-    def test_filter_routes_by_route_code(self) -> None:
-        response = self.client.get(ROUTE_URL, {"route_code": self.route_1.route_code})
-
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn(self.serializer_1.data, response.data["results"])
-        self.assertNotIn(self.serializer_2.data, response.data["results"])
-
-    def test_filter_routes_by_source_name(self) -> None:
-        response = self.client.get(ROUTE_URL, {"source_name": self.route_1.source.name})
-
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn(self.serializer_1.data, response.data["results"])
-        self.assertNotIn(self.serializer_2.data, response.data["results"])
-
-    def test_filter_routes_by_destination_name(self) -> None:
-        response = self.client.get(
-            ROUTE_URL, {"destination_name": self.route_1.destination.name}
+    def test_filter_routes_by_params(self) -> None:
+        responses = (
+            self.client.get(ROUTE_URL, {"route_code": self.route_1.route_code}),
+            self.client.get(ROUTE_URL, {"source_name": self.route_1.source.name}),
+            self.client.get(
+                ROUTE_URL, {"destination_name": self.route_1.destination.name}
+            ),
+            self.client.get(
+                ROUTE_URL, {"source_iata": self.route_1.source.iata_code}
+            ),
+            self.client.get(
+                ROUTE_URL, {"destination_iata": self.route_1.destination.iata_code}
+            ),
         )
 
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn(self.serializer_1.data, response.data["results"])
-        self.assertNotIn(self.serializer_2.data, response.data["results"])
-
-    def test_filter_routes_by_source_iata_code(self) -> None:
-        response = self.client.get(
-            ROUTE_URL, {"source_iata": self.route_1.source.iata_code}
-        )
-
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn(self.serializer_1.data, response.data["results"])
-        self.assertNotIn(self.serializer_2.data, response.data["results"])
-
-    def test_filter_routes_by_destination_iata_code(self) -> None:
-        response = self.client.get(
-            ROUTE_URL, {"destination_iata": self.route_1.destination.iata_code}
-        )
-
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn(self.serializer_1.data, response.data["results"])
-        self.assertNotIn(self.serializer_2.data, response.data["results"])
+        for response in responses:
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            self.assertIn(self.serializer_1.data, response.data["results"])
+            self.assertNotIn(self.serializer_2.data, response.data["results"])
 
     def test_route_retrieve(self) -> None:
         response = self.client.get(detail_url(self.route_1.id))

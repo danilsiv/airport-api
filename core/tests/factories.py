@@ -39,7 +39,10 @@ def create_airport(as_dict: bool=False, **params) -> Airport | dict:
         "city": create_city()
     }
     defaults.update(params)
-    return defaults if as_dict else Airport.objects.create(**defaults)
+    if as_dict:
+        defaults["city"] = defaults["city"].id
+        return defaults
+    return Airport.objects.create(**defaults)
 
 
 def create_route(as_tuple: bool=False, **params) -> Route | tuple:

@@ -88,8 +88,7 @@ def create_crew_group(as_dict: bool=False, **params) -> CrewGroup | dict:
 def create_airplane_type(as_dict: bool=False, **params) -> AirplaneType | dict:
     defaults = {"name": "test_airplane_type"}
     defaults.update(params)
-    airplane_type, created = AirplaneType.objects.get_or_create(**defaults)
-    return defaults if as_dict else airplane_type
+    return defaults if as_dict else AirplaneType.objects.get_or_create(**defaults)[0]
 
 
 def create_airplane(as_dict: bool=False, **params) -> Airplane | dict:

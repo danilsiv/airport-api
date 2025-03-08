@@ -111,7 +111,10 @@ def create_seat_configuration(as_dict: bool=False, **params) -> SeatConfiguratio
         "airplane": create_airplane()
     }
     defaults.update(params)
-    return defaults if as_dict else SeatConfiguration.objects.create(**defaults)
+    if as_dict:
+        defaults["airplane"] = defaults["airplane"].id
+        return defaults
+    return SeatConfiguration.objects.create(**defaults)
 
 
 def create_flight(as_dict: bool=False, **params) -> Flight | dict:

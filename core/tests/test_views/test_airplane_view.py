@@ -16,7 +16,7 @@ def detail_url(airplane_id: int):
     return reverse("core:airplane-detail", args=[airplane_id])
 
 
-class AdminAirportApiTest(TestCase):
+class AdminAirplaneApiTest(TestCase):
     def setUp(self) -> None:
         self.client = APIClient()
         self.user = get_user_model().objects.create_user(

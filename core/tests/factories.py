@@ -80,15 +80,9 @@ def create_crew_member(as_dict: bool=False, **params) -> CrewMember | dict:
 
 def create_crew_group(as_dict: bool=False, **params) -> CrewGroup | dict:
     defaults = {"crew_code": "BB222"}
-    crew_group = CrewGroup.objects.get_or_create(**defaults)[0]
     defaults.update(params)
 
-    crew_group.pilots.set(params.get("pilots", []))
-    crew_group.pilots.set(params.get("stewards", []))
-    crew_group.pilots.set(params.get("technicians", []))
-    crew_group.pilots.set(params.get("additional_staff", []))
-
-    return defaults if as_dict else crew_group
+    return defaults if as_dict else CrewGroup.objects.get_or_create(**defaults)[0]
 
 
 def create_airplane_type(as_dict: bool=False, **params) -> AirplaneType | dict:

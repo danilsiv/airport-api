@@ -146,21 +146,29 @@ def create_order(as_tuple: bool=False, user: User=None, **params) -> Order | tup
     return Order.objects.create(**defaults)
 
 
-def create_ticket(**params) -> Ticket:
-    create_seat_configuration(
-        seats_class=params.get("seat_class", "EC"),
-        airplane=params.get("airplane", create_airplane(model_name="special"))
-    )
+def create_ticket(as_dict: bool = False, **params) -> Ticket | dict:
+    airplane = params.pop("airplane", create_airplane(model_name="special"))
+    seat_class = params.get("seat_class", "EC")
+
+    seat_conf = SeatConfiguration.objects.filter(airplane=airplane, seats_class=seat_class).first()
+    if not seat_conf:
+        seat_conf = create_seat_configuration(seats_class=seat_class, airplane=airplane)
+
     defaults = {
         "row": 1,
         "seat": 1,
         "passenger_first_name": "test_first_name",
         "passenger_last_name": "test_last_name",
-        "seat_class": "EC",
-        "flight": create_flight(
-            airplane=params.pop("airplane", Airplane.objects.get(model_name="special"))
-        ),
-        "order": create_order()
+        "seat_class": seat_class,
+        "flight": params.get("flight") or create_flight(airplane=airplane),
     }
     defaults.update(params)
+
+    if as_dict:
+        defaults["flight"] = defaults["flight"].id
+        defaults["seat_configuration"] = seat_conf.id
+        return defaults
+
+    defaults["order"] = create_order()
     return Ticket.objects.create(**defaults)
+

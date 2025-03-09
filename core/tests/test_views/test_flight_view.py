@@ -5,6 +5,8 @@ from rest_framework.test import APIClient
 from django.test import TestCase
 from django.urls import reverse
 
+from core.models import Flight
+from core.serializers import CrewGroupListSerializer, AirplaneSeatConfigurationRetrieveSerializer, RouteListSerializer
 from core.tests.factories import create_flight, create_airport, create_city, create_route, create_crew_group
 
 FLIGHT_URL = reverse("core:flight-list")
@@ -114,3 +116,44 @@ class AdminFlightApiTest(TestCase):
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             self.assertIn(self.expected_data_1, response.data["results"])
             self.assertNotIn(self.expected_data_2, response.data["results"])
+
+    def test_flight_retrieve(self) -> None:
+        response = self.client.get(detail_url(self.flight_1.id))
+        expected_data = {
+            "id": self.flight_1.id,
+            "flight_number": self.flight_1.flight_number,
+            "ec_available": 0,
+            "bc_available": 0,
+            "fc_available": 0,
+            "route": RouteListSerializer(self.flight_1.route).data,
+            "airplane": AirplaneSeatConfigurationRetrieveSerializer(
+                self.flight_1.airplane
+            ).data,
+            "departure_time": "02 Feb 2020, 02:02",
+            "arrival_time": "04 Feb 2020, 02:02",
+            "status": self.flight_1.get_status_display(),
+            "crew": CrewGroupListSerializer(self.flight_1.crew).data
+        }
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data, expected_data)
+
+    def test_flight_create(self) -> None:
+        payload = create_flight(as_dict=True)
+        response = self.client.post(FLIGHT_URL, payload)
+        flight = Flight.objects.get(id=response.data["id"])
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(payload["flight_number"], flight.flight_number)
+        self.assertEqual(payload["route"], flight.route.id)
+        self.assertEqual(payload["airplane"], flight.airplane.id)
+        self.assertEqual(
+            payload["departure_time"],
+            flight.departure_time.strftime("%Y-%m-%d %H:%M:%S")
+        )
+        self.assertEqual(
+            payload["arrival_time"],
+            flight.arrival_time.strftime("%Y-%m-%d %H:%M:%S")
+        )
+        self.assertEqual(payload["status"], flight.status)
+        self.assertEqual(payload["crew"], flight.crew.id)

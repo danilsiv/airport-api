@@ -124,10 +124,16 @@ def create_flight(as_dict: bool=False, **params) -> Flight | dict:
         "airplane": create_airplane(),
         "departure_time": "2020-02-02 02:02:00",
         "arrival_time": "2020-02-02 22:02:00",
+        "status": "SD",
         "crew": create_crew_group()
     }
     defaults.update(params)
-    return defaults if as_dict else Flight.objects.create(**defaults)
+    if as_dict:
+        defaults["route"] = defaults["route"].id
+        defaults["airplane"] = defaults["airplane"].id
+        defaults["crew"] = defaults["crew"].id
+        return defaults
+    return Flight.objects.create(**defaults)
 
 
 def create_order(as_tuple: bool=False, user: User=None, **params) -> Order | tuple:

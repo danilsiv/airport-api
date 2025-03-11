@@ -26,7 +26,7 @@ class CityTest(TestCase):
 
 class AirportTest(TestCase):
     def test_iata_code_validation(self) -> None:
-        airport = create_airport(iata_code="invalid")
+        airport = create_airport(iata_code="tt")
         with self.assertRaises(ValidationError):
             airport.full_clean()
 

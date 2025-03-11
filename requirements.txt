@@ -11,6 +11,8 @@ jsonschema-specifications==2024.10.1
 packaging==24.2
 pathspec==0.12.1
 pillow==11.1.0
+psycopg==3.2.5
+psycopg-binary==3.2.5
 platformdirs==4.3.6
 PyJWT==2.9.0
 PyYAML==6.0.2
